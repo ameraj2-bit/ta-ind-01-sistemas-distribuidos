@@ -11,7 +11,7 @@ Este repositorio reúne el trabajo de los cuatro integrantes del grupo. **Cada i
 |---|---|---|
 | Emanuel Pino Juliana Romina | `(completar nombre de la carpeta)/` | (completar) |
 | Lombeida Escaleras Bryan Humberto | `Lombeida Escaleras Bryan Humberto/` | (completar) |
-| Mera Jumbo Allison Michelle | `mera-jumbo-allison/` | (completar) |
+| Mera Jumbo Allison Michelle | `mera-jumbo-allison/` | Apache Kafka (comparado con RabbitMQ)  |
 | Silva Triviño John Jairo | `Silva Triviño John Jairo/` | Apache Cassandra (comparado con MongoDB) |
 
 ## Qué contiene cada carpeta

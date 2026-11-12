@@ -1,0 +1,21 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ieee-config}[2026/11/05 Configuración bibliográfica IEEE]
+
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc}
+\RequirePackage[english,spanish]{babel}
+\RequirePackage{graphicx}
+\RequirePackage{csquotes}
+\RequirePackage{booktabs}
+\RequirePackage[hidelinks]{hyperref}
+
+\RequirePackage[
+  backend=biber,
+  style=ieee,
+  citestyle=numeric-comp,
+  sorting=none,
+  doi=true,
+  url=true,
+  isbn=false
+]{biblatex}
+\DefineBibliographyStrings{spanish}{artno={art.}}

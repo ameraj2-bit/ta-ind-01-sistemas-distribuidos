@@ -29,6 +29,7 @@
 
 **Tiempo dedicado:** 5 horas.
 
+
 # Sesión 3: 12 de noviembre de 2026
 
 **Actividades realizadas**
@@ -40,6 +41,7 @@
 **Solución:** Se agregaron las tres capturas con los fragmentos subrayados y se corrigieron los enlaces y el ISBN en `referencias.bib`.
 
 **Tiempo dedicado:** 1 hora.
+
 
 ## Sesión 4: 13 de noviembre de 2026
 
@@ -54,6 +56,7 @@
 
 **Tiempo dedicado:** 2 horas.
 
+
 ## Sesión 5: 13 de noviembre de 2026
 
 **Actividades realizadas**
@@ -66,6 +69,7 @@
 **Solución:** Se dispusieron las capturas del Anexo B en páginas horizontales y se precisó en el texto qué afirmaciones corresponden a Spanner y cuáles se usan solo como apoyo conceptual. La captura de *Efficient Causal Access* queda pendiente de ubicar cuando se cite ese artículo en el análisis comparativo.
 
 **Tiempo dedicado:** 3 horas.
+
 
 ## Sesión 6: 13 de noviembre de 2026
 
@@ -80,4 +84,19 @@
 
 **Solución:** Se utilizó `sudo` para los comandos de Docker y se cambió a la carpeta de trabajo de Bryan antes de ejecutar el programa. Se distinguió expresamente la prueba local de transacciones de una prueba de replicación o tolerancia a fallos del servicio de producción.
 
-**Tiempo dedicado:** 4 horas.
+**Tiempo dedicado:** 3 horas.
+
+
+## Sesión 7: 13 de noviembre de 2026
+
+**Actividades realizadas**
+
+- Se comprobó que el emulador estaba activo y que la consulta devolvía los saldos de 90 y 60. Luego se detuvo el contenedor y se repitió la consulta con un límite de 15 segundos. El comando `timeout` terminó con el código 124.
+- Se reinició el contenedor y se volvió a consultar. El emulador respondió `Instance not found`. Después de recrear la instancia, la base y la tabla, se comprobó que la consulta devolvía los saldos de la nueva carga, 100 y 50.
+- Se guardaron las capturas, se documentaron los comandos y resultados en `experimento/README-Experimento.md` y se incorporó al informe la subsección «Interrupción y recuperación del emulador». Se recompiló el PDF y se comprobó que incluyera las cuatro capturas.
+
+**Problemas encontrados:** La instancia anterior dejó de estar disponible tras el reinicio. En el primer intento de recrearla, Python devolvió `ModuleNotFoundError` porque el entorno virtual no estaba activo.
+
+**Solución:** Se activó el entorno virtual, se configuró la conexión local y se ejecutaron de nuevo `preparar` y `consultar`. En el informe se explicó que el emulador pierde su estado en memoria al reiniciarse y que la consulta volvió a funcionar tras cargar los datos iniciales.
+
+**Tiempo dedicado:** 1 hora.

@@ -2,9 +2,7 @@
 
 ## 1. Descripción y objetivo
 
-Este directorio contiene el programa y las capturas originales de una prueba realizada con el **emulador oficial de Spanner** para la actividad TA-IND-01. El caso utiliza dos cuentas de prueba y una transferencia de 10 unidades. Se observa qué ocurre cuando la transacción se cancela antes de confirmarse y cuando se confirma correctamente.
-
-El objetivo es comprobar, en este entorno local, que una cancelación deja ambos saldos como estaban y que una confirmación aplica los dos cambios. La prueba se relaciona con las transacciones y la coordinación de operaciones sobre datos compartidos. **No es una prueba de replicación, consenso, particiones de red, tolerancia a la caída de una réplica ni rendimiento de Spanner en producción.** [Google documenta estas diferencias del emulador](https://docs.cloud.google.com/spanner/docs/emulator#limitations).
+Este directorio reúne el programa y las capturas de una transferencia de prueba y de una interrupción controlada del emulador de Google Spanner. La transferencia permite observar una cancelación y una confirmación. La interrupción permite comprobar cómo cambia la respuesta del cliente al detener el contenedor, reiniciarlo y volver a preparar sus datos.
 
 ## 2. Entorno utilizado
 
@@ -131,24 +129,58 @@ Con los saldos iniciales intactos, el programa vuelve a preparar los dos cambios
 | Después de cancelar | 100 | 50 | 150 | `EjecucionCancelacion.png` |
 | Después de confirmar | 90 | 60 | 150 | `EjecucionConfirmar.png` |
 
-## 8. Interpretación y alcance
+## 8. Interrupción y recuperación del emulador
 
-En esta ejecución local, la cancelación dejó ambos registros con sus valores iniciales y el commit aplicó los dos cambios. Eso es coherente con la atomicidad de una transacción: el conjunto de operaciones se confirma o se revierte como unidad. La conservación del total de 150 permite comprobar además que la transferencia del caso de prueba no creó ni eliminó saldo.
+La prueba se ejecutó el 13 de noviembre de 2026 desde la carpeta del estudiante. Se utilizó la misma consulta en cada etapa y se registró la respuesta del cliente.
 
-El resultado **no demuestra** que una réplica sobrevivió a una caída, que se alcanzó un quórum Paxos ni que se mantuvo disponibilidad durante una partición. El emulador conserva datos solo en memoria, pierde el estado al reiniciarse y no reproduce el rendimiento ni la escalabilidad de producción. Además, sus transacciones de lectura y escritura bloquean la base completa hasta terminar; por eso no debe utilizarse para inferir el comportamiento de concurrencia de un despliegue real. [Limitaciones oficiales del emulador](https://docs.cloud.google.com/spanner/docs/emulator#limitations).
+### Estado previo y detención
 
-## 9. Problemas encontrados y solución
+```bash
+source /tmp/spanner-ta-ind-01-venv/bin/activate
+export SPANNER_EMULATOR_HOST=localhost:9010
+sudo docker ps
+python experimento/prueba_spanner.py consultar
+sudo docker stop spanner-ta-ind-01
+sudo docker ps -a
+timeout 15s python experimento/prueba_spanner.py consultar
+printf 'Código de salida: %s\n' "$?"
+```
+
+### Reinicio y preparación de datos
+
+```bash
+sudo docker start spanner-ta-ind-01
+sudo docker ps
+timeout 15s python experimento/prueba_spanner.py consultar
+printf 'Código de salida: %s\n' "$?"
+```
+
+Después de registrar la respuesta del emulador recién iniciado, se recrearon los datos:
+
+```bash
+source /tmp/spanner-ta-ind-01-venv/bin/activate
+export SPANNER_EMULATOR_HOST=localhost:9010
+python experimento/prueba_spanner.py preparar
+python experimento/prueba_spanner.py consultar
+```
+
+| Etapa | Resultado observado | Captura |
+|---|---|---|
+| Antes de detener el emulador | La consulta devolvió 90 y 60. | [Consulta de referencia](ComprobacionInicialAntesExperimento.png) |
+| Contenedor detenido | El comando alcanzó el límite externo de 15 segundos y salió con código 124. | [Contenedor detenido](DetencionEmulador-ProbarConsulta.png) |
+| Después del reinicio | El contenedor estaba activo y la consulta devolvió `Instance not found`. Python salió con código 1. | [Respuesta gRPC](ReinicioRecuperacion-Parte1.png) y [salida de Python](ReinicioRecuperacion-Parte2.png) |
+| Después de preparar los datos | El programa creó la instancia y la tabla. La consulta devolvió los saldos iniciales de 100 y 50. | [Preparación y consulta correctas](ComprobacionFalloYRecuperacionEmulador.png) |
+
+## 9. Interpretación y alcance
+
+La interrupción fue visible desde el cliente en dos formas. Con el contenedor detenido, la consulta quedó sin completar dentro del límite fijado. Después del reinicio, el servidor respondió indicando que la instancia anterior no existía. Para volver a consultar hubo que crear una instancia y cargar datos iniciales. Los saldos de 100 y 50 corresponden a esa nueva carga. El alcance de esta prueba es la comunicación entre el cliente y el emulador local, cuyo estado se guarda en memoria. [Documentación oficial del emulador](https://docs.cloud.google.com/spanner/docs/emulator).
+
+## 10. Problemas encontrados y solución
 
 | Problema observado | Solución aplicada |
 |---|---|
-| `docker info` no pudo acceder al socket sin permisos. | Se utilizó `sudo docker info` y `sudo docker` para iniciar y comprobar el contenedor. |
-| Python buscó el programa en `/home/bryan/experimento/`. | Se cambió a la carpeta de Bryan dentro del repositorio y se repitió `preparar`. |
+| `docker info` no pudo acceder al socket sin permisos. | Se utilizó `sudo docker` para iniciar y comprobar el contenedor. |
+| Python buscó el programa en `/home/bryan/experimento/`. | Se cambió a la carpeta del estudiante y se repitió `preparar`. |
+| Al intentar preparar los datos después del reinicio, Python devolvió `ModuleNotFoundError: No module named 'google'`. [Captura del intento](VolverPreparacionDatos.png). | Se activó el entorno virtual, se exportó `SPANNER_EMULATOR_HOST` y se repitieron `preparar` y `consultar`. |
 
-## 10. Reproducción y precauciones
-
-1. Comprobar que el contenedor esté activo con `sudo docker ps`.
-2. Activar el entorno virtual y exportar `SPANNER_EMULATOR_HOST=localhost:9010`.
-3. Situarse en la carpeta de Bryan y ejecutar, en orden, `preparar`, `consultar`, `cancelar` y `confirmar`.
-4. Conservar las salidas y capturas originales de una nueva ejecución por separado de las evidencias históricas.
-
-`confirmar` está pensado para ejecutarse una sola vez sobre los saldos iniciales. Reiniciar el emulador elimina **todos** sus datos, esquema y configuración; después de un reinicio se necesitará ejecutar `preparar` de nuevo. No se deben atribuir los resultados de esta prueba local a un clúster distribuido de producción. [Documentación oficial](https://docs.cloud.google.com/spanner/docs/emulator).
+Para reproducir la secuencia completa, ejecutar primero los pasos de la transferencia de la sección 7 y después los de la sección 8. Al detener el emulador para esta prueba se perderán sus datos en memoria.

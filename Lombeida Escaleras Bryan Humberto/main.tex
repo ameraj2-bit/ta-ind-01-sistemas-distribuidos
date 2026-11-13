@@ -95,8 +95,56 @@ El 4 de julio de 2023, Google informó que un número limitado de usuarios de Sp
 % 6. Experimentación propia
 \section{Experimentación propia}
 \subsection{Montaje y procedimiento}
+El 13 de noviembre de 2026 se utilizó el emulador oficial de Spanner en un contenedor Docker local y la biblioteca de Spanner para Python. El contenedor expuso el servicio gRPC en \texttt{localhost:9010}; una variable de entorno dirigió el programa cliente a ese servicio. Google indica que el emulador conserva los datos en memoria y ofrece las API necesarias para desarrollar y probar aplicaciones, aunque no reproduce todas las características del servicio de producción \cite{GoogleSpannerEmulator}.
+
+La prueba creó una instancia, una base de datos y una tabla \texttt{Cuentas} con dos filas: la cuenta de Bryan comenzó con 100 unidades y la cuenta de destino con 50. Después de consultar ambos saldos, se preparó una transferencia de 10 unidades en una transacción que se canceló deliberadamente antes del commit. Por último, se repitió la transferencia y se permitió su confirmación. Esta secuencia se ejecutó mediante los pasos \texttt{preparar}, \texttt{consultar}, \texttt{cancelar} y \texttt{confirmar} del programa, en ese orden.
+
+Como segunda prueba, se consultaron los saldos confirmados, se detuvo el contenedor y se repitió la consulta con un límite de 15 segundos. Después se inició el mismo contenedor, se consultó la instancia anterior y, finalmente, se volvieron a crear los datos de prueba.
+
 \subsection{Capturas y resultados}
-\subsection{Interpretación según los conceptos de la Unidad 1}
+En la prueba de transferencia, los saldos iniciales de 100 y 50 se mantuvieron tras cancelar la transacción. Al confirmarla, pasaron a 90 y 60, con un total de 150.
+
+\subsubsection{Interrupción y recuperación del emulador}
+Con el emulador activo, la consulta de referencia devolvió los saldos de 90 y 60. Tras detener el contenedor, el comando de consulta no terminó dentro de los 15 segundos y el programa \texttt{timeout} salió con código 124.
+
+\begin{center}
+\begin{minipage}{\linewidth}\centering
+\includegraphics[width=\linewidth,height=0.35\textheight,keepaspectratio]{experimento/ComprobacionInicialAntesExperimento.png}
+
+\par\small Figura experimental 1. Consulta de referencia con el contenedor activo y los saldos de 90 y 60.
+\end{minipage}
+\end{center}
+
+\begin{center}
+\begin{minipage}{\linewidth}\centering
+\includegraphics[width=\linewidth,height=0.35\textheight,keepaspectratio]{experimento/DetencionEmulador-ProbarConsulta.png}
+
+\par\small Figura experimental 2. Contenedor detenido y consulta interrumpida al alcanzar el límite de 15 segundos.
+\end{minipage}
+\end{center}
+
+Tras el reinicio, Docker mostró el contenedor activo y el servicio respondió con \texttt{Instance not found}. La consulta volvió a funcionar después de ejecutar \texttt{preparar}, que creó la instancia y cargó los saldos de 100 y 50.
+
+\begin{center}
+\begin{minipage}{\linewidth}\centering
+\includegraphics[width=\linewidth,height=0.35\textheight,keepaspectratio]{experimento/ReinicioRecuperacion-Parte1.png}
+
+\par\small Figura experimental 3. Contenedor reiniciado y respuesta gRPC \texttt{NOT\_FOUND} para la instancia anterior.
+\end{minipage}
+\end{center}
+
+\begin{center}
+\begin{minipage}{\linewidth}\centering
+\includegraphics[width=\linewidth,height=0.35\textheight,keepaspectratio]{experimento/ComprobacionFalloYRecuperacionEmulador.png}
+
+\par\small Figura experimental 4. Creación de una instancia nueva y consulta de los saldos iniciales de 100 y 50.
+\end{minipage}
+\end{center}
+
+\subsection{Interpretación}
+La misma consulta permitió distinguir dos estados desde el cliente: al detener el contenedor, no hubo respuesta antes del límite fijado. Tras el reinicio, el servicio respondió, pero indicó que la instancia anterior ya no existía. El fallo fue visible para la aplicación y el acceso a los datos requirió recrear la instancia y cargar los registros iniciales. Ese comportamiento concuerda con el almacenamiento en memoria del emulador \cite{GoogleSpannerEmulator}.
+
+El experimento ilustra la comunicación cliente--servidor y el efecto observable de una interrupción local. Su alcance se limita a la disponibilidad de la consulta en este contenedor y a la recreación de sus datos. El código 124 registra el límite impuesto al comando, mientras que los mecanismos de replicación y quórum de Spanner se analizan con la documentación de producción \cite{GoogleSpannerEmulator,GoogleSpannerReplication}.
 
 % 7. Ejemplos del entorno del estudiante
 \section{Ejemplos del entorno del estudiante}

@@ -9,7 +9,7 @@
 - **Tiempo dedicado:** 2:35h
 - **Siguiente paso:** Estudiar la arquitectura de HDFS, hacer a mano el boceto de su arquitectura y levantar un clúster con un NameNode y 3 DataNodes en Docker.
 
-- ## 2026-11-12 (noche)
+## 2026-11-12 (noche)
 
 - **Qué hice:** Estudié la arquitectura de HDFS (NameNode, DataNodes, bloques, replicación, latidos, lectura y escritura) y la comparé con Ceph. Contesté preguntas de comprobación y dibujé a mano el boceto de la arquitectura con 1 NameNode y 3 DataNodes, con mi nombre y la fecha. Después preparé el entorno con Docker: levanté un clúster de 1 NameNode y 4 DataNodes con `docker compose`, comprobé con `dfsadmin -report` que había 4 DataNodes vivos, creé un archivo de 300 MB, lo subí a HDFS y revisé con `fsck` cómo se repartieron sus 3 bloques y sus réplicas. Apagué `datanode4` a las 23:28:51 y monitoreé la reacción del NameNode.
 - **Problema encontrado:** Mi monitoreo con `Select-String` imprimía objetos largos y era difícil de leer. Además, no medí una lectura de línea base antes de apagar el nodo.

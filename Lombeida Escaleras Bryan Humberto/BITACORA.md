@@ -1,6 +1,6 @@
 # Bitácora de trabajo — TA-IND-01 - de Bryan Lombeida
 
-## Sesión 11 — 12 de noviembre de 2026
+## Sesión 1:  11 — 12 de noviembre de 2026
 
 **Actividades realizadas**
 
@@ -15,7 +15,7 @@
 **Tiempo dedicado:** 1 hora y 30 minutos.
 
 
-## Sesión 12 — 12 de noviembre de 2026
+## Sesión 2: 12 de noviembre de 2026
 
 **Actividades realizadas**
 
@@ -28,3 +28,15 @@
 **Solución:** se conservaron las fuentes pertinentes para los temas de transparencias, CAP/PACELC, comunicación y tolerancia a fallos; las fuentes descartadas se retiraron del `.bib`.
 
 **Tiempo dedicado:** 5 horas.
+
+# Sesión 3: 12 de noviembre de 2026
+
+**Actividades realizadas**
+- Se añadieron capturas de los artículos *Efficient Causal Access in Geo-Replicated Storage Systems*, *Fast Commitment for Geo-Distributed Transactions via Decentralized Co-coordinators* y *HoliPaxos: Towards More Predictable Performance in State Machine Replication*, con los fragmentos citados subrayados para facilitar su comprobación.
+- Se corrigieron en `referencias.bib` los enlaces de dos trabajos de USENIX para que apunten directamente a sus PDF y se añadió el ISBN faltante de uno de ellos.
+
+**Problema encontrado:** Faltaban evidencias visuales de los fragmentos citados; dos referencias no enlazaban directamente a los PDF y una carecía de ISBN.
+
+**Solución:** Se agregaron las tres capturas con los fragmentos subrayados y se corrigieron los enlaces y el ISBN en `referencias.bib`.
+
+**Tiempo dedicado:** 1 hora.

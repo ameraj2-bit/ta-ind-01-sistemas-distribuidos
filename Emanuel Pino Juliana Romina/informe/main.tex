@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[spanish]{babel}
+\usepackage{graphicx}
 \usepackage[backend=biber,style=ieee]{biblatex}
 \usepackage{hyperref}
 
@@ -49,6 +50,15 @@ Durante el funcionamiento normal, el primario propaga a sus réplicas un flujo d
 Redis Cluster intercambia mensajes de latido y usa información compartida entre nodos para detectar fallos. Un nodo puede marcar inicialmente a otro como posiblemente inaccesible; para considerar que un primario ha fallado y permitir una promoción, la condición debe ser confirmada por una mayoría de primarios dentro del intervalo establecido. Una réplica que cumple las condiciones puede solicitar votos y asumir el rol de primario. Si no es posible promover una réplica o no se conserva la mayoría requerida, el clúster puede dejar de atender solicitudes \cite{redisClusterSpec,redisClusterScaling}.
 
 Estos mecanismos no equivalen a una garantía de conservación de todas las escrituras confirmadas ni de disponibilidad ante cualquier partición. En particular, la replicación asíncrona deja una ventana en la que un primario puede fallar antes de que una escritura llegue a su réplica; además, el lado minoritario de una partición puede dejar de aceptar escrituras. Por tanto, la recuperación depende de la topología, de la conectividad entre nodos y de la configuración del clúster \cite{redisClusterSpec,redisReplication}.
+
+La Figura~\ref{fig:arquitectura-redis} resume la topología descrita: los nodos primarios distribuyen las 16\,384 ranuras de hash, cada uno cuenta con una réplica y los nodos se comunican mediante el bus del clúster. La leyenda distingue estas conexiones. El esquema es de elaboración propia y está basado en la documentación oficial de Redis \cite{redisClusterSpec,redisClusterScaling}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth,height=0.75\textheight,keepaspectratio]{../diagramas/arquitectura_redis.pdf}
+    \caption{Arquitectura distribuida de Redis Cluster.}
+    \label{fig:arquitectura-redis}
+\end{figure}
 
 \section{Transparencias}
 

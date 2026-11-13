@@ -3,7 +3,10 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[spanish]{babel}
+\usepackage[backend=biber,style=ieee]{biblatex}
 \usepackage{hyperref}
+
+\addbibresource{referencias.bib}
 
 \title{Análisis crítico de Redis como sistema distribuido y comparación con Valkey}
 \author{Emanuel Pino Juliana Romina}
@@ -17,7 +20,35 @@
 
 \section{Introducción}
 
+Redis es un almacén de datos en memoria que permite trabajar con estructuras como cadenas y hashes mediante comandos enviados a un servidor. La documentación oficial presenta usos que incluyen base de datos, caché, motor de flujos y agente de mensajería; por ello, Redis puede atender necesidades distintas de almacenamiento y acceso a datos, según la forma en que se configure y utilice \cite{redisDataStore,redisQuickStarts}.
+
+En este trabajo, Redis se estudia como sistema distribuido y se toma Valkey como sistema de comparación. El análisis se centra en Redis Cluster: cómo reparte los datos entre nodos, cómo se comunican los clientes y qué mecanismos ofrece para continuar operando ante ciertos fallos. Esta delimitación permite describir las capacidades documentadas del sistema sin asumir que una instalación independiente de Redis tiene las mismas propiedades que un clúster.
+
+Como antecedentes, se han publicado tanto una propuesta de caché distribuida basada en Redis como una evaluación de Redis frente a MongoDB y Cassandra con cargas de YCSB. Sus resultados corresponden a los diseños y condiciones evaluados en cada artículo, por lo que no se consideran garantías generales sobre el rendimiento de Redis \cite{shi2024distributed,kausar2022ycsb}.
+
 \section{Arquitectura}
+
+Redis puede ejecutarse como una instancia independiente. Para distribuir un conjunto de datos entre varios servidores, Redis Cluster organiza instancias Redis en una topología de nodos que asignan y atienden partes del espacio de claves. El clúster proporciona fragmentación de datos y puede mantener operaciones ante algunos fallos, pero su disponibilidad depende de que permanezca accesible la mayoría de los nodos primarios y haya réplicas para los primarios que dejen de estar disponibles \cite{redisClusterScaling,redisClusterSpec}.
+
+\subsection{Nodos primarios, réplicas y distribución de datos}
+
+En Redis Cluster, cada nodo primario es responsable de un subconjunto de las 16\,384 ranuras de hash (\textit{hash slots}). La ranura de una clave se calcula aplicando CRC16 a la clave y tomando el resultado módulo 16\,384. También se pueden usar etiquetas de hash (\textit{hash tags}) entre llaves para que claves relacionadas se asignen a la misma ranura. Esto permite que ciertas operaciones con varias claves se ejecuten cuando todas pertenecen a una misma ranura \cite{redisClusterSpec}.
+
+Un primario puede tener una o más réplicas. Las réplicas reciben los cambios del primario y, si este falla, una réplica elegible puede ser promovida para atender las ranuras que estaban asignadas a aquel. La replicación es asíncrona: el primario puede responder a una escritura antes de que todas sus réplicas la hayan recibido. Por ese motivo, la documentación advierte que una escritura reconocida por el primario puede perderse durante algunos escenarios de fallo \cite{redisClusterScaling,redisReplication,redisClusterSpec}.
+
+\subsection{Comunicación entre clientes y nodos}
+
+Los clientes se comunican con Redis mediante RESP, un protocolo de solicitud y respuesta en el que el cliente envía comandos y el servidor devuelve respuestas. La conexión suele realizarse por TCP al puerto de servicio de Redis, cuyo valor predeterminado es 6379. En un clúster, el cliente calcula o consulta qué nodo atiende la ranura de la clave. Los nodos no actúan como proxy de las solicitudes: si un cliente contacta al nodo equivocado, este puede responder con una redirección \texttt{MOVED} o, durante una migración de ranura, \texttt{ASK}. Los clientes compatibles pueden actualizar su mapa de ranuras y conectarse directamente al nodo correspondiente \cite{redisResp,redisClusterSpec}.
+
+La comunicación entre los nodos del clúster es independiente del protocolo de cliente. Los nodos se conectan mediante el bus del clúster, que usa un protocolo binario para intercambiar mensajes de estado, detección de fallos y cambios de configuración. De forma predeterminada, el puerto del bus se obtiene sumando 10\,000 al puerto de servicio; por ejemplo, al puerto de servicio 6379 le corresponde el puerto 16379 \cite{redisClusterScaling,redisClusterSpec}. Un estudio de parcheo en vivo para Redis Cluster describe el uso de su protocolo interno de gossip para distribuir parches entre nodos; este trabajo examina la actualización del software, no modifica las garantías de replicación de datos \cite{fruth2024livepatch}.
+
+\subsection{Replicación y recuperación ante fallos}
+
+Durante el funcionamiento normal, el primario propaga a sus réplicas un flujo de comandos que refleja los cambios del conjunto de datos. Si se interrumpe la conexión, la réplica intenta reconectarse y solicitar una sincronización parcial de los comandos que no recibió. Si esto no es posible, se realiza una sincronización completa mediante una copia de los datos del primario y el posterior envío de los cambios recientes \cite{redisReplication}.
+
+Redis Cluster intercambia mensajes de latido y usa información compartida entre nodos para detectar fallos. Un nodo puede marcar inicialmente a otro como posiblemente inaccesible; para considerar que un primario ha fallado y permitir una promoción, la condición debe ser confirmada por una mayoría de primarios dentro del intervalo establecido. Una réplica que cumple las condiciones puede solicitar votos y asumir el rol de primario. Si no es posible promover una réplica o no se conserva la mayoría requerida, el clúster puede dejar de atender solicitudes \cite{redisClusterSpec,redisClusterScaling}.
+
+Estos mecanismos no equivalen a una garantía de conservación de todas las escrituras confirmadas ni de disponibilidad ante cualquier partición. En particular, la replicación asíncrona deja una ventana en la que un primario puede fallar antes de que una escritura llegue a su réplica; además, el lado minoritario de una partición puede dejar de aceptar escrituras. Por tanto, la recuperación depende de la topología, de la conectividad entre nodos y de la configuración del clúster \cite{redisClusterSpec,redisReplication}.
 
 \section{Transparencias}
 
@@ -40,5 +71,7 @@
 \section{Declaración de uso de IA}
 
 \section{Anexos}
+
+\printbibliography
 
 \end{document}

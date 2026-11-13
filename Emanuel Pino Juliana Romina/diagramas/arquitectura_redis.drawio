@@ -1,0 +1,127 @@
+<mxfile host="app.diagrams.net" agent="diagrams.net">
+  <diagram id="redis-cluster-architecture" name="Arquitectura Redis Cluster">
+    <mxGraphModel dx="3161" dy="930" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cluster-bg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7F9FC;strokeColor=#5B6573;strokeWidth=2;verticalAlign=top;spacingTop=14;fontStyle=1;fontSize=18;fontColor=#263238;" value="Redis Cluster&#xa;Esquema ilustrativo: 3 nodos primarios y 1 réplica por primario" vertex="1">
+          <mxGeometry height="540" width="1280" x="270" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=26;fontStyle=1;fontColor=#172B4D;" value="Arquitectura distribuida de Redis Cluster" vertex="1">
+          <mxGeometry height="48" width="1150" x="40" y="24" as="geometry" />
+        </mxCell>
+        <mxCell id="owner-date" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=14;fontColor=#455A64;" value="Nombre: Juliana Emanuel Pino Fecha : 13 / 11 / 2026" vertex="1">
+          <mxGeometry height="30" width="1150" x="-80" y="82" as="geometry" />
+        </mxCell>
+        <mxCell id="source-note" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontColor=#455A64;" value="Slots y conexiones representados de forma esquemática. Rangos: ejemplo oficial de Redis para tres primarios; verifique la asignación del clúster concreto." vertex="1">
+          <mxGeometry height="30" width="1250" x="285" y="708" as="geometry" />
+        </mxCell>
+        <mxCell id="client" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEBFF;strokeColor=#3973AC;strokeWidth=2;fontColor=#17365D;fontStyle=1;fontSize=15;" value="Cliente Redis&#xa;RESP sobre TCP&#xa;Cliente compatible con Cluster" vertex="1">
+          <mxGeometry height="105" width="190" x="40" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="client-note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDF4FC;strokeColor=#A9C6E8;fontColor=#17365D;fontSize=12;" value="Puede seguir redirecciones MOVED o ASK cuando el nodo contactado no atiende el slot solicitado." vertex="1">
+          <mxGeometry height="62" width="220" x="35" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="bus-label" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#7E57C2;strokeWidth=1.5;fontColor=#45277A;fontStyle=1;fontSize=13;" value="Cluster Bus: comunicación TCP binaria entre nodos; malla completa punto a punto (no es un nodo central)" vertex="1">
+          <mxGeometry height="44" width="1050" x="380" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="bus-p1-p2" edge="1" parent="1" source="primary-1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;dashed=1;dashPattern=8 4;strokeColor=#7E57C2;strokeWidth=1.5;startArrow=none;endArrow=none;" target="primary-2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bus-p2-p3" edge="1" parent="1" source="primary-2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;dashed=1;dashPattern=8 4;strokeColor=#7E57C2;strokeWidth=1.5;startArrow=none;endArrow=none;" target="primary-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bus-r1-r2" edge="1" parent="1" source="replica-1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;dashed=1;dashPattern=8 4;strokeColor=#7E57C2;strokeWidth=1.5;startArrow=none;endArrow=none;" target="replica-2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bus-r2-r3" edge="1" parent="1" source="replica-2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;dashed=1;dashPattern=8 4;strokeColor=#7E57C2;strokeWidth=1.5;startArrow=none;endArrow=none;" target="replica-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bus-p1-r2" edge="1" parent="1" source="primary-1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;dashed=1;dashPattern=8 4;strokeColor=#7E57C2;strokeWidth=1.5;startArrow=none;endArrow=none;" target="replica-2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bus-p2-r3" edge="1" parent="1" source="primary-2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;dashed=1;dashPattern=8 4;strokeColor=#7E57C2;strokeWidth=1.5;startArrow=none;endArrow=none;" target="replica-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bus-p3-r1" edge="1" parent="1" source="primary-3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;dashed=1;dashPattern=8 4;strokeColor=#7E57C2;strokeWidth=1.5;startArrow=none;endArrow=none;" target="replica-1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="client-primary-1" edge="1" parent="1" source="client" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3973AC;strokeWidth=2;startArrow=block;endArrow=block;fontSize=12;fontColor=#17365D;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="primary-1" value="RESP/TCP">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="replication-1" edge="1" parent="1" source="primary-1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;strokeWidth=2.5;endArrow=block;endFill=1;fontSize=12;fontColor=#1B5E20;labelBackgroundColor=#FFFFFF;" target="replica-1" value="Replicación asíncrona">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="replication-2" edge="1" parent="1" source="primary-2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;strokeWidth=2.5;endArrow=block;endFill=1;fontSize=12;fontColor=#1B5E20;labelBackgroundColor=#FFFFFF;" target="replica-2" value="Replicación asíncrona">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="replication-3" edge="1" parent="1" source="primary-3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;strokeWidth=2.5;endArrow=block;endFill=1;fontSize=12;fontColor=#1B5E20;labelBackgroundColor=#FFFFFF;" target="replica-3" value="Replicación asíncrona">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="primary-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4D6;strokeColor=#C65911;strokeWidth=2;fontColor=#7F2704;fontStyle=1;fontSize=15;" value="Primario 1&lt;br&gt;Hash slots:&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(127, 39, 4), rgb(252, 176, 146));&quot;&gt;0–5460&lt;/span&gt;" vertex="1">
+          <mxGeometry height="90" width="270" x="330" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="primary-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4D6;strokeColor=#C65911;strokeWidth=2;fontColor=#7F2704;fontStyle=1;fontSize=15;" value="Primario 2&lt;br&gt;Hash slots: 5461–10922" vertex="1">
+          <mxGeometry height="90" width="270" x="770" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="primary-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4D6;strokeColor=#C65911;strokeWidth=2;fontColor=#7F2704;fontStyle=1;fontSize=15;" value="Primario 3&lt;br&gt;Hash slots: 10923–16383" vertex="1">
+          <mxGeometry height="90" width="270" x="1210" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="replica-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D9EAD3;strokeColor=#548235;strokeWidth=2;fontColor=#274E13;fontStyle=1;fontSize=15;" value="Réplica 1&#xa;Replica del Primario 1" vertex="1">
+          <mxGeometry height="90" width="270" x="330" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="replica-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D9EAD3;strokeColor=#548235;strokeWidth=2;fontColor=#274E13;fontStyle=1;fontSize=15;" value="Réplica 2&#xa;Replica del Primario 2" vertex="1">
+          <mxGeometry height="90" width="270" x="770" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="replica-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D9EAD3;strokeColor=#548235;strokeWidth=2;fontColor=#274E13;fontStyle=1;fontSize=15;" value="Réplica 3&#xa;Replica del Primario 3" vertex="1">
+          <mxGeometry height="90" width="270" x="1210" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="bus-note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3EFFA;strokeColor=#B39DDB;fontColor=#45277A;fontSize=12;align=left;spacing=8;" value="Las líneas moradas discontinuas muestran conexiones representativas. En Redis Cluster cada nodo mantiene conexiones TCP con los demás mediante el Cluster Bus." vertex="1">
+          <mxGeometry height="52" width="1150" x="330" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fontColor=#263238;" value="Leyenda" vertex="1">
+          <mxGeometry height="28" width="90" x="280" y="755" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-client-swatch" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEBFF;strokeColor=#3973AC;" value="" vertex="1">
+          <mxGeometry height="20" width="24" x="380" y="758" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-client-text" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=13;" value="Cliente" vertex="1">
+          <mxGeometry height="26" width="85" x="410" y="755" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-primary-swatch" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4D6;strokeColor=#C65911;" value="" vertex="1">
+          <mxGeometry height="20" width="24" x="500" y="758" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-primary-text" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=13;" value="Primario" vertex="1">
+          <mxGeometry height="26" width="95" x="530" y="755" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-replica-swatch" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D9EAD3;strokeColor=#548235;" value="" vertex="1">
+          <mxGeometry height="20" width="24" x="635" y="758" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-replica-text" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=13;" value="Réplica" vertex="1">
+          <mxGeometry height="26" width="90" x="665" y="755" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-replication-line" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#2E7D32;strokeWidth=2.5;endArrow=block;endFill=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="770" y="768" as="sourcePoint" />
+            <mxPoint x="820" y="768" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-replication-text" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=13;" value="Replicación (primario a réplica)" vertex="1">
+          <mxGeometry height="26" width="250" x="830" y="755" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-bus-line" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;dashed=1;dashPattern=8 4;strokeColor=#7E57C2;strokeWidth=1.5;startArrow=none;endArrow=none;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1090" y="768" as="sourcePoint" />
+            <mxPoint x="1140" y="768" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-bus-text" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=13;" value="Comunicación por Cluster Bus" vertex="1">
+          <mxGeometry height="26" width="300" x="1150" y="755" as="geometry" />
+        </mxCell>
+        <mxCell id="reference" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#607D8B;" value="Fuente técnica: Redis Cluster specification y Scale with Redis Cluster, documentación oficial de Redis." vertex="1">
+          <mxGeometry height="24" width="1250" x="280" y="820" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

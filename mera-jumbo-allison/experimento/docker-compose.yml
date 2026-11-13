@@ -1,0 +1,46 @@
+services:
+  consul1:
+    image: hashicorp/consul:1.20
+    container_name: consul1
+    command:
+      - agent
+      - -server
+      - -bootstrap-expect=3
+      - -node=consul1
+      - -client=0.0.0.0
+      - '-bind={{ GetInterfaceIP "eth0" }}'
+      - -retry-join=consul2
+      - -retry-join=consul3
+      - -ui
+    ports:
+      - "8500:8500"
+
+  consul2:
+    image: hashicorp/consul:1.20
+    container_name: consul2
+    command:
+      - agent
+      - -server
+      - -bootstrap-expect=3
+      - -node=consul2
+      - -client=0.0.0.0
+      - '-bind={{ GetInterfaceIP "eth0" }}'
+      - -retry-join=consul1
+      - -retry-join=consul3
+    ports:
+      - "8501:8500"
+
+  consul3:
+    image: hashicorp/consul:1.20
+    container_name: consul3
+    command:
+      - agent
+      - -server
+      - -bootstrap-expect=3
+      - -node=consul3
+      - -client=0.0.0.0
+      - '-bind={{ GetInterfaceIP "eth0" }}'
+      - -retry-join=consul1
+      - -retry-join=consul2
+    ports:
+      - "8502:8500"

@@ -66,3 +66,18 @@
 **Solución:** Se dispusieron las capturas del Anexo B en páginas horizontales y se precisó en el texto qué afirmaciones corresponden a Spanner y cuáles se usan solo como apoyo conceptual. La captura de *Efficient Causal Access* queda pendiente de ubicar cuando se cite ese artículo en el análisis comparativo.
 
 **Tiempo dedicado:** 3 horas.
+
+## Sesión 6: 13 de noviembre de 2026
+
+**Actividades realizadas**
+
+- Se comprobó Docker y se inició el emulador oficial de Google Spanner en el contenedor `spanner-ta-ind-01`, con los puertos locales 9010 y 9020. Se instaló la biblioteca `google-cloud-spanner` en un entorno virtual de Python y se verificó su importación.
+- Se ejecutó `experimento/prueba_spanner.py` por etapas. La preparación creó la instancia, la base y dos cuentas con saldos iniciales de 100 y 50; la consulta confirmó un total de 150.
+- Se canceló deliberadamente una transferencia antes del commit y se comprobó que los saldos permanecieron en 100 y 50. Luego se confirmó la transferencia y se observaron saldos de 90 y 60, con el total todavía en 150.
+- Se guardaron capturas originales de la instalación, preparación, consulta, cancelación y confirmación en `experimento/`. Se documentaron los comandos, resultados y límites de la prueba en `experimento/README-Experimento.md`.
+
+**Problemas encontrados:** `docker info` no pudo acceder al servidor sin permisos; además, el primer intento de ejecutar el programa desde `/home/bryan` falló porque la ruta relativa `experimento/prueba_spanner.py` no existía allí.
+
+**Solución:** Se utilizó `sudo` para los comandos de Docker y se cambió a la carpeta de trabajo de Bryan antes de ejecutar el programa. Se distinguió expresamente la prueba local de transacciones de una prueba de replicación o tolerancia a fallos del servicio de producción.
+
+**Tiempo dedicado:** 4 horas.

@@ -50,8 +50,20 @@ Repositorio: & \url{https://github.com/ameraj2-bit/ta-ind-01-sistemas-distribuid
 \section{Análisis con los conceptos de la Unidad 1}
 \subsection{Transparencias de distribución}
 \subsubsection{Acceso y ubicación}
+Spanner permite que una aplicación consulte y modifique la base de datos mediante bibliotecas cliente o una API, sin necesidad de conectarse por separado a cada réplica de la información. Además, las bibliotecas se encargan de aspectos como la gestión de sesiones y la ejecución de transacciones. Esto ofrece transparencia de acceso, ya que la aplicación no tiene que preocuparse por dónde se encuentran los datos; aun así, sigue siendo responsabilidad de la aplicación elegir la operación que desea realizar y la interfaz que va a utilizar \cite{GoogleSpannerAPIs,GoogleSpannerReplication}.
+
+Asimismo, la ubicación física de cada fila queda en gran medida fuera de la vista de la aplicación: Spanner organiza los datos en rangos denominados \emph{splits} y mantiene réplicas de cada uno. No obstante, esa transparencia no es absoluta. Al configurar la instancia se elige una configuración regional o multirregional, y la ubicación del líder puede influir en el tiempo que tarda una escritura. Por eso, aunque la aplicación no necesite localizar una fila para utilizarla, la ubicación sigue siendo un factor importante para el diseño y el rendimiento \cite{GoogleSpannerReplication}.
+
 \subsubsection{Migración y reubicación}
+En lo que se refiere a la migración y la reubicación, Spanner puede dividir un \emph{split} cuando su carga aumenta, redistribuir los rangos resultantes entre los recursos disponibles y volver a fusionarlos cuando la carga disminuye. Esto permite que la distribución interna cambie sin que el usuario tenga que mover manualmente cada fila. Aun así, ese movimiento no es del todo invisible en sus efectos: Google advierte que, si la división y el reequilibrio no avanzan al mismo ritmo que la carga, pueden aumentar la latencia y aparecer tiempos de espera o transacciones abortadas. Por ello, la transparencia en materia de migración y reubicación puede considerarse solo parcial \cite{GoogleSpannerPreSplitting}.
+
 \subsubsection{Replicación, concurrencia y fallos}
+En el ámbito de la replicación, la concurrencia y los fallos, Spanner mantiene varias réplicas de cada \emph{split} y se apoya en una votación basada en Paxos para confirmar las escrituras. El cliente trabaja con la base de datos sin tener que administrar cada una de esas copias por separado; en ese sentido, la replicación puede considerarse transparente. No obstante, el tiempo necesario para comunicarse con las réplicas y reunir una mayoría puede percibirse como latencia \cite{GoogleSpannerReplication}.
+
+En cuanto a la concurrencia, el nivel de aislamiento serializable es el predeterminado para las transacciones de Spanner. El sistema coordina operaciones simultáneas para preservar ese aislamiento, pero una transacción puede abortarse por conflictos y requerir un nuevo intento. Así, Spanner evita que la aplicación tenga que coordinar directamente a las réplicas, aunque no le oculta por completo los conflictos entre transacciones \cite{GoogleSpannerTransactions}.
+
+La transparencia de fallos también tiene un límite. En una configuración regional base hay tres réplicas con voto, cada una en una zona distinta; si una falla, las otras dos aún pueden formar la mayoría necesaria para escribir. En cambio, si no existe esa mayoría, una escritura no puede confirmarse. La replicación permite soportar ciertos fallos, pero no garantiza que cualquier operación siga disponible ante cualquier interrupción \cite{GoogleSpannerReplication}.
+
 \subsection{CAP y PACELC}
 \subsubsection{Prioridades ante una partición de red}
 \subsubsection{Latencia y consistencia sin partición}

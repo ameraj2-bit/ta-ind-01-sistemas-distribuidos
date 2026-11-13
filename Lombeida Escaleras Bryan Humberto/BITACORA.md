@@ -40,3 +40,16 @@
 **Solución:** Se agregaron las tres capturas con los fragmentos subrayados y se corrigieron los enlaces y el ISBN en `referencias.bib`.
 
 **Tiempo dedicado:** 1 hora.
+
+## Sesión 4: 13 de noviembre de 2026
+
+**Actividades realizadas**
+
+- Se preparó una guía de la arquitectura de una escritura en Spanner y se elaboró el bosquejo inicial a mano, fotografiado como `figuras/Anexo-A.jpeg`, con nombre y fecha visibles.
+- Se agregó la redacción de las siete transparencias de distribución y se incorporaron los párrafos revisados a `main.tex`, con citas de documentación oficial mediante BibLaTeX.
+
+**Problema encontrado:** La primera compilación no pudo generar una fuente tipográfica porque TeX intentó escribir su caché fuera de una carpeta con permiso. 
+
+**Solución:** Se compiló en un directorio temporal con una caché de TeX escribible y se copió únicamente el PDF resultante a esta carpeta. El contenido de la carátula queda pendiente de revisión.
+
+**Tiempo dedicado:** 2 horas.

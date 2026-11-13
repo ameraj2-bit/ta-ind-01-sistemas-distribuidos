@@ -11,23 +11,33 @@
 % 1. Carátula
 \begin{titlepage}
 \centering
-{\Large Universidad Tecnica Estatal de Quevedo\par}
-\vspace{0.5cm}
-{\large Facultad de Ciencia de la Computación\par}
-{\large Carrera: Software\par}
+{\Large\bfseries Universidad Técnica Estatal de Quevedo\par}
+\vspace{0.5em}
+{\large Facultad de Ciencias de la Computación\par}
 \vfill
-{\LARGE\bfseries Análisis crítico de sistemas distribuidos\par}
-\vspace{0.5cm}
-{\large Google Spanner vs Amazon DynamoDB\par}
+\textbf{Carrera:}\par\smallskip
+Software\par
 \vfill
-\begin{tabular}{ll}
-Asignatura: & Aplicaciones Distribuidas \\
-Código de la actividad: & TA-IND-01 \\
-Estudiante: & Bryan Humberto Lombeida Escaleras \\
-Paralelo: & "A" \\
-Fecha: & 13-11-2026 \\
-Repositorio: & \url{https://github.com/ameraj2-bit/ta-ind-01-sistemas-distribuidos.git} \\
-\end{tabular}
+\textbf{Asignatura:}\par\smallskip
+Aplicaciones Distribuidas\par
+\vfill
+\textbf{Actividad:}\par\smallskip
+TA-IND-01 \textperiodcentered{} Informe Académico Individual\par
+\smallskip
+Análisis crítico de sistemas distribuidos: Google Spanner y Amazon DynamoDB\par
+\vfill
+\textbf{Estudiante:}\par\smallskip
+Bryan Humberto Lombeida Escaleras\par
+\vfill
+\textbf{Paralelo:}\par\smallskip
+«A»\par
+\vfill
+\textbf{Fecha:}\par\smallskip
+Viernes 13 de noviembre de 2026\par
+\vfill
+\textbf{Enlace del repositorio de GitHub}\par\smallskip
+{\footnotesize\sffamily
+\mbox{\href{https://github.com/ameraj2-bit/ta-ind-01-sistemas-distribuidos.git}{https://github.com/ameraj2-bit/ta-ind-01-sistemas-distribuidos.git}}\par}
 \vfill
 \end{titlepage}
 
@@ -48,7 +58,7 @@ Repositorio: & \url{https://github.com/ameraj2-bit/ta-ind-01-sistemas-distribuid
 % Insertar diagrama propio elaborado en draw.io o TikZ; remitir al Anexo A.
 
 % 5. Análisis con conceptos de la Unidad 1
-\section{Análisis con los conceptos de la Unidad 1}
+\section{Análisis con los conceptos}
 \subsection{Transparencias de distribución}
 \subsubsection{Acceso y ubicación}
 Spanner permite que una aplicación consulte y modifique la base de datos mediante bibliotecas cliente o una API, sin necesidad de conectarse por separado a cada réplica de la información. Además, las bibliotecas se encargan de aspectos como la gestión de sesiones y la ejecución de transacciones. Esto ofrece transparencia de acceso, ya que la aplicación no tiene que preocuparse por dónde se encuentran los datos; aun así, sigue siendo responsabilidad de la aplicación elegir la operación que desea realizar y la interfaz que va a utilizar \cite{GoogleSpannerAPIs,GoogleSpannerReplication}.
@@ -152,15 +162,70 @@ El experimento ilustra la comunicación cliente--servidor y el efecto observable
 
 % 8. Análisis comparativo
 \section{Análisis comparativo}
+La comparación se centra en Spanner con una configuración multirregional y en las tablas globales de DynamoDB con consistencia eventual multirregional (MREC). Se toma MREC como caso principal porque AWS lo aplica por defecto al crear una tabla global sin indicar un modo. También se considera la opción de consistencia fuerte multirregional (MRSC) al discutir las decisiones de diseño \cite{GoogleSpannerReplication,AWSGlobalTables}.
+
+\par\noindent
+\begin{minipage}{\linewidth}
 \subsection{Tabla de comparación}
-% Comparar con otro sistema real mediante al menos cinco criterios de la Unidad 1.
+\centering
+\refstepcounter{table}
+\label{tab:spanner-dynamodb}
+\small \textbf{\tablename~\thetable.} Spanner multirregional y DynamoDB Global Tables en modo MREC\par\smallskip
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.23}
+\begin{tabular}{@{}p{0.18\linewidth}p{0.37\linewidth}p{0.37\linewidth}@{}}
+\toprule
+\raggedright\textbf{Criterio} & \raggedright\textbf{Google Spanner} & \raggedright\textbf{DynamoDB (MREC)} \tabularnewline
+\midrule
+\raggedright Acceso y ubicación &
+\raggedright El cliente usa la API de la base. El servicio dirige las escrituras al líder de las réplicas correspondientes \cite{GoogleSpannerAPIs,GoogleSpannerReplication}. &
+\raggedright El cliente opera con elementos identificados por clave. El servicio localiza la partición en la región que atiende la solicitud \cite{ElhemaliEtAl2022DynamoDB,AWSGlobalTables}. \tabularnewline
+\raggedright Comunicación &
+\raggedright El cliente envía solicitudes al servicio. El líder comunica cada escritura a las réplicas con voto \cite{GoogleSpannerAPIs,GoogleSpannerReplication}. &
+\raggedright El cliente envía solicitudes a la API. Un servicio de enrutamiento las dirige a los nodos que almacenan los datos \cite{ElhemaliEtAl2022DynamoDB}. \tabularnewline
+\raggedright Replicación &
+\raggedright La escritura se confirma con el acuerdo de la mayoría de las réplicas con voto \cite{GoogleSpannerReplication}. &
+\raggedright La réplica que recibe una escritura propaga el cambio a otras regiones de forma asincrónica \cite{AWSGlobalTables}. \tabularnewline
+\raggedright Partición de red (CAP) &
+\raggedright Sin una mayoría de votos, el grupo de réplicas afectado no puede confirmar escrituras \cite{GoogleSpannerReplication}. &
+\raggedright Una réplica que sigue operativa puede aceptar escrituras locales aunque se interrumpa la replicación entre regiones \cite{AWSGlobalTables}. \tabularnewline
+\raggedright Latencia y consistencia (PACELC) &
+\raggedright La escritura espera el acuerdo del quórum. Una lectura que admita datos anteriores puede servirse desde una réplica cercana con la versión solicitada \cite{GoogleSpannerReplication}. &
+\raggedright La escritura en una región no espera a que el cambio llegue a las demás. Una lectura en otra región puede devolver una versión anterior \cite{AWSGlobalTables}. \tabularnewline
+\raggedright Concurrencia y transacciones &
+\raggedright Los cambios de una transacción se aplican como unidad. El aislamiento serializable se usa por defecto \cite{GoogleSpannerTransactions}. &
+\raggedright La transacción es atómica en la región donde se ejecuta. Una réplica remota puede mostrar solo parte de los cambios durante la propagación \cite{AWSGlobalTables,IdziorekEtAl2023DynamoDB}. \tabularnewline
+\raggedright Recuperación ante fallos &
+\raggedright Las escrituras pueden continuar si hay quórum. Una réplica atrasada puede solicitar a otra los cambios pendientes \cite{GoogleSpannerReplication}. &
+\raggedright La aplicación puede redirigir el tráfico hacia otra réplica. Cuando se recupera una réplica aislada, se propagan los cambios pendientes \cite{AWSGlobalTables}. \tabularnewline
+\bottomrule
+\end{tabular}
+\end{minipage}\par
+
 \subsection{Discusión de resultados}
+Para una transferencia como la del experimento, importa cuándo una consulta puede ver juntos el débito y el crédito. En Spanner, una transacción de lectura y escritura con el aislamiento predeterminado aplica ambos cambios como una sola operación. En DynamoDB con MREC, esa garantía se cumple en la región que procesa la transacción. Mientras se propagan los cambios, una lectura en otra región puede mostrar el débito de una cuenta sin reflejar todavía el crédito en la otra. Si ver ambos cambios juntos es un requisito de la aplicación, esa diferencia pesa en la elección del sistema \cite{GoogleSpannerTransactions,AWSGlobalTables}.
+
+Para datos que se consultan por clave y pueden admitir un retraso entre regiones, la propagación asincrónica de MREC permite confirmar la escritura sin esperar a las réplicas remotas. Si dos regiones modifican el mismo elemento, se conserva la versión con la marca de tiempo interna más reciente. AWS también ofrece MRSC, que replica la escritura de forma sincrónica en al menos otra región antes de confirmarla y permite lecturas fuertes en cualquier réplica. La documentación de AWS indica que las tablas en modo MRSC no admiten operaciones transaccionales \cite{ElhemaliEtAl2022DynamoDB,AWSGlobalTables}.
+
+Lima y colaboradores examinaron otra decisión que afecta a la aplicación: dónde y cuándo leer un objeto que depende de cambios anteriores. Evaluaron sus estrategias de lectura con DynamoDB, Amazon S3 y MongoDB. En ese estudio, consultar más de una réplica podía reducir la espera, aunque también podía generar más solicitudes de lectura. El resultado ayuda a explicar por qué la estrategia del cliente importa cuando los datos se distribuyen entre regiones. Sus resultados corresponden a esas estrategias de acceso causal \cite{LimaEtAl2023CausalAccess}.
 
 % 9. Postura crítica
 \section{Postura crítica}
 \subsection{Fortalezas}
+La principal fortaleza de Spanner es que permite mantener juntas las operaciones que forman parte de una misma decisión. Con el aislamiento serializable predeterminado, una transacción de lectura y escritura aplica todos sus cambios como una unidad. Además, si una transacción termina antes de que comience otra, el orden en que se observan sus efectos respeta esa secuencia. Esto resulta valioso al reservar la última unidad de un producto, porque la comprobación del inventario y el registro de la reserva pueden formar parte de la misma transacción \cite{GoogleSpannerTransactions}.
+
+La replicación también aporta continuidad frente a fallos parciales. Spanner puede seguir confirmando escrituras mientras conserve una mayoría de réplicas con voto. Además, cuando una aplicación acepta datos de un instante anterior, una réplica cercana que ya tenga esa versión puede atender la lectura. Esto permite reservar las lecturas fuertes para las operaciones que necesitan conocer el estado más reciente \cite{GoogleSpannerReplication}.
+
 \subsection{Limitaciones y compromisos de diseño}
+Confirmar una escritura exige que el líder obtenga el acuerdo de una mayoría. La latencia de esa coordinación puede aumentar cuando las réplicas con voto están en regiones alejadas. Si se pierde el quórum, las escrituras afectadas no se pueden confirmar. Por eso, al elegir dónde ubicar las réplicas conviene evaluar tanto el tiempo de respuesta habitual como los fallos que la aplicación debe soportar \cite{GoogleSpannerReplication}.
+
+El aislamiento predeterminado también tiene un costo cuando muchas transacciones intentan modificar los mismos datos. Con el control de concurrencia pesimista, una transacción larga puede retener bloqueos y provocar esperas o abortos. Los reintentos ayudan a resolver conflictos transitorios, pero pueden aumentar el tiempo que tarda la aplicación en completar la operación. Estos efectos corresponden al servicio de producción y deben evaluarse allí. El emulador utilizado en el experimento bloquea toda la base durante una transacción de lectura y escritura y tiene un comportamiento de rendimiento diferente \cite{GoogleSpannerTransactions,GoogleSpannerEmulator}.
+
 \subsection{Contextos en los que no conviene utilizarlo}
+Para un catálogo distribuido que consulta artículos por clave, actualiza cada elemento por separado y admite que otra región muestre temporalmente una versión anterior, DynamoDB con MREC puede encajar mejor. En ese modo, la confirmación de una escritura no espera la propagación a las demás regiones. La aplicación debe aceptar el retraso y considerar que, si dos regiones modifican el mismo elemento, prevalece la escritura con la marca de tiempo interna más reciente \cite{ElhemaliEtAl2022DynamoDB,AWSGlobalTables}.
+
+Spanner tampoco sería la mejor opción si el requisito principal fuera seguir aceptando escrituras en una región aislada que ha perdido contacto con la mayoría. En ese escenario, el quórum impide confirmar esas operaciones. Si la aplicación puede aceptar divergencias temporales y resolverlas después, la replicación asincrónica de MREC ofrece una alternativa siempre que la réplica regional siga operativa \cite{GoogleSpannerReplication,AWSGlobalTables}.
 
 % 10. Conclusiones
 \section{Conclusiones}
@@ -192,9 +257,12 @@ Lectura anotada de Zhang y colaboradores, página 2555. El fragmento marcado des
 \includegraphics[width=\linewidth,height=0.90\textheight,keepaspectratio]{capturas/HoliPaxos.png}
 \end{center}
 Lectura anotada de Liang y colaboradores, página 2505. El fragmento marcado trata la detección de fallos en HoliPaxos; se usa como apoyo conceptual, sin atribuir ese mecanismo a Spanner \cite{LiangEtAl2025HoliPaxos}.
-\end{landscape}
 
-% Pendiente: añadir capturas/EfficientCausalAccess.png cuando el artículo
-% de Lima y colaboradores se cite en el análisis comparativo del informe.
+\clearpage
+\begin{center}
+\includegraphics[width=\linewidth,height=0.90\textheight,keepaspectratio]{capturas/EfficientCausalAccess.png}
+\end{center}
+Lectura anotada de Lima y colaboradores, página 1 del PDF. El fragmento marcado presenta el equilibrio entre latencia y costo al decidir dónde y cuándo leer, y enumera los servicios usados para evaluar las estrategias, entre ellos DynamoDB \cite{LimaEtAl2023CausalAccess}.
+\end{landscape}
 
 \end{document}

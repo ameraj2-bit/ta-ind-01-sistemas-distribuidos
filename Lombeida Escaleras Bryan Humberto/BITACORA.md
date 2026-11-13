@@ -100,3 +100,18 @@
 **Solución:** Se activó el entorno virtual, se configuró la conexión local y se ejecutaron de nuevo `preparar` y `consultar`. En el informe se explicó que el emulador pierde su estado en memoria al reiniciarse y que la consulta volvió a funcionar tras cargar los datos iniciales.
 
 **Tiempo dedicado:** 1 hora.
+
+## Sesión 8: 13 de noviembre de 2026
+
+**Actividades realizadas**
+
+- Se comparó Google Spanner multirregional con DynamoDB Global Tables en modo MREC mediante una tabla de siete criterios de la Unidad 1. La discusión también explicó las diferencias con el modo MRSC y respaldó las afirmaciones con citas numéricas.
+- Se incorporó al Anexo B la captura de lectura de Lima y colaboradores. En el análisis se citó su estudio sobre el costo y la latencia de distintas estrategias de lectura en sistemas con réplicas en varias regiones.
+- Se recompiló el PDF y se comprobó que la tabla apareciera antes de la discusión y que la captura de Lima estuviera en el Anexo B.
+- Se redactó la postura crítica de Spanner en `main.tex`. Se analizaron las fortalezas de las transacciones y la replicación, los compromisos de latencia y disponibilidad asociados al quórum, y los escenarios en los que DynamoDB con MREC puede ser más adecuado.
+
+**Problemas encontrados:** En la primera compilación, LaTeX colocó la tabla después de la discusión. Para redactar la postura crítica se necesitaba precisar qué garantías corresponden al servicio de producción y qué observaciones proceden del emulador.
+
+**Solución:** Se ajustó la ubicación de la tabla en `main.tex` y se volvió a compilar el informe para verificar el orden. Se respaldaron las valoraciones con las fuentes ya citadas y se explicó el alcance de los resultados del emulador.
+
+**Tiempo dedicado:** 1 hora y media.

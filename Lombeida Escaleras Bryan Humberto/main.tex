@@ -1,5 +1,6 @@
 \IfFileExists{IEEEtran.cls}{\documentclass[conference]{IEEEtran}}{\documentclass{article}}
 \usepackage{ieee-config}
+\usepackage{pdflscape}
 \addbibresource{referencias.bib}
 
 \title{Análisis crítico de sistemas distribuidos: [sistema elegido]}
@@ -66,12 +67,30 @@ La transparencia de fallos también tiene un límite. En una configuración regi
 
 \subsection{CAP y PACELC}
 \subsubsection{Prioridades ante una partición de red}
+Tomemos como caso la configuración regional base de tres réplicas. Si una zona queda separada de las otras dos, las dos que siguen comunicadas pueden reunir la mayoría y confirmar escrituras. La réplica aislada no puede confirmar por sí sola una escritura nueva. En este escenario, Spanner conserva la regla de confirmación por mayoría incluso cuando eso impide escribir desde el lado que perdió el quórum. Esta es la razón concreta para decir que, ante esa partición, prioriza la consistencia de las escrituras frente a la disponibilidad de escritura en la parte aislada; no significa que todo Spanner deje de funcionar \cite{GoogleSpannerReplication}.
+
 \subsubsection{Latencia y consistencia sin partición}
+La decisión sigue teniendo un costo. Una escritura pasa por la réplica líder y necesita votos de una mayoría antes de confirmarse; por ello, la comunicación entre réplicas forma parte de su latencia. El artículo de Zhang y colaboradores señala que, en las transacciones geodistribuidas, la coordinación y el consenso pueden exigir varias rondas de comunicación entre regiones. El artículo estudia una propuesta llamada D2PC: sus resultados de rendimiento no deben presentarse como mediciones de Spanner \cite{GoogleSpannerReplication,ZhangEtAl2024D2PC}.
+
+Para las lecturas, la elección es más específica: Spanner ofrece lecturas fuertes, que incluyen los efectos de las transacciones confirmadas antes de comenzar la lectura, y modalidades que permiten leer datos de un momento anterior. Una lectura con antigüedad permitida puede atenderse desde una réplica cercana que ya tenga los datos correspondientes, mientras que una lectura fuerte desde una réplica no líder puede necesitar comunicación con el líder. En términos de PACELC, esto muestra un compromiso entre obtener datos recientes y reducir ciertos viajes de red; no sería preciso asignar una única prioridad de latencia o consistencia a todas las operaciones \cite{GoogleSpannerTransactions,GoogleSpannerReplication}.
+
 \subsection{Modelos de comunicación}
-% Cliente-servidor, peer-to-peer o híbrido; sincronía; sockets, RPC o mensajería.
+Desde la aplicación, el modelo es cliente--servicio: el programa envía operaciones a Spanner mediante sus bibliotecas o API y recibe resultados o errores. Las bibliotecas oficiales se construyen sobre gRPC, y Google también ofrece una API RPC y una API REST. Por eso podemos identificar RPC como un mecanismo documentado de comunicación con el servicio, sin suponer que cada comunicación interna entre réplicas usa exactamente la misma interfaz pública \cite{GoogleSpannerAPIs}.
+
+Dentro del sistema, la comunicación cumple otra función. Cada \emph{split} tiene un conjunto de réplicas y una de ellas actúa como líder. Para una escritura, el líder la remite a las demás réplicas con voto y espera las respuestas necesarias para alcanzar mayoría. En términos del análisis, esta coordinación se parece a un modelo con líder, no a una red donde todos los participantes cumplen siempre el mismo papel. Zhang y colaboradores describen además a Spanner como un ejemplo de coordinación de transacciones mediante 2PC sobre Multi-Paxos \cite{GoogleSpannerReplication,ZhangEtAl2024D2PC}.
+
+La confirmación de una escritura depende de recibir votos, por lo que hay una espera sincrónica en esa parte del proceso. Después, las réplicas que aún no registraron la escritura pueden completarlo en segundo plano. Esto permite hablar de pasos sincrónicos y trabajo posterior asíncrono, pero la documentación consultada no justifica describir todas las comunicaciones internas como «mensajería» ni especificar el tipo de socket utilizado \cite{GoogleSpannerReplication}.
+
 \subsection{Tolerancia a fallos}
 \subsubsection{Fallos soportados, detección y recuperación}
+Spanner combina copias de los datos, elección de líder y confirmación por mayoría. En la configuración regional de tres réplicas, puede seguir confirmando escrituras tras la pérdida de una réplica, porque permanecen dos votos. La documentación también indica que una réplica atrasada puede solicitar los datos que le faltan a otra para ponerse al día, y que el sistema de archivos subyacente ayuda a recuperar archivos tras fallos de máquina o disco. Estas son capacidades documentadas; no equivalen a afirmar que el servicio resiste cualquier número o tipo de fallos \cite{GoogleSpannerReplication}.
+
+Respecto de la detección, la documentación de Spanner consultada permite afirmar que sus conjuntos de réplicas eligen un líder y que las bibliotecas cliente pueden gestionar reintentos ante errores transitorios. No aporta, en estas fuentes, un plazo universal ni un mecanismo específico de latidos para detectar todos los fallos; por ello, no conviene inventar esos detalles. El trabajo sobre HoliPaxos analiza detectores de fallos y lentitud como parte de otro protocolo de replicación: ayuda a entender el problema general, pero no prueba que Spanner implemente los detectores propuestos allí \cite{GoogleSpannerReplication,GoogleSpannerAPIs,LiangEtAl2025HoliPaxos}.
+
+A nivel de cliente, los reintentos ofrecen otra vía de recuperación ante ciertos errores temporales. Google muestra, por ejemplo, cómo configurar una política para volver a intentar una operación que recibe \texttt{UNAVAILABLE}, con esperas entre intentos. Esos reintentos deben distinguirse de la recuperación de una réplica: actúan sobre la solicitud de la aplicación y no sustituyen el quórum interno \cite{GoogleSpannerRetries,GoogleSpannerReplication}.
+
 \subsubsection{Incidente real documentado, si existe}
+El 4 de julio de 2023, Google informó que un número limitado de usuarios de Spanner tuvo errores al crear sesiones y utilizar API de control. El incidente duró aproximadamente dos horas y dieciséis minutos; Google señaló de forma preliminar una configuración incorrecta en el manejo de metadatos que sobrecargó esas operaciones. Algunos clientes con sesiones ya abiertas pudieron seguir trabajando, mientras que otros encontraron errores al reconectarse. El caso muestra un límite práctico de la transparencia de fallos en el acceso al servicio, pero no demuestra un fallo del consenso entre réplicas, porque el reporte no atribuye el incidente a ese mecanismo \cite{GoogleSpannerIncident2023}.
 
 % 6. Experimentación propia
 \section{Experimentación propia}
@@ -107,8 +126,27 @@ La transparencia de fallos también tiene un límite. En una configuración regi
 % 13. Anexos
 \appendix
 \section{Anexo A: fotografía del esquema a mano}
-% Insertar la fotografía y explicar su relación con el diagrama final.
+\begin{center}
+\includegraphics[width=\textwidth,height=0.68\textheight,keepaspectratio]{figuras/Anexo-A.jpeg}
+\end{center}
+
+Bosquejo inicial de una escritura en Google Spanner, elaborado a mano el 13 de noviembre de 2026.
+
 \section{Anexo B: capturas de lectura de las fuentes}
-% Insertar las capturas de lectura identificadas por fuente.
+\begin{landscape}
+\begin{center}
+\includegraphics[width=\linewidth,height=0.90\textheight,keepaspectratio]{capturas/FastCommitmentGeo-Distributed.png}
+\end{center}
+Lectura anotada de Zhang y colaboradores, página 2555. El fragmento marcado describe la coordinación de Spanner mediante 2PC sobre Multi-Paxos y la comunicación entre regiones \cite{ZhangEtAl2024D2PC}.
+
+\clearpage
+\begin{center}
+\includegraphics[width=\linewidth,height=0.90\textheight,keepaspectratio]{capturas/HoliPaxos.png}
+\end{center}
+Lectura anotada de Liang y colaboradores, página 2505. El fragmento marcado trata la detección de fallos en HoliPaxos; se usa como apoyo conceptual, sin atribuir ese mecanismo a Spanner \cite{LiangEtAl2025HoliPaxos}.
+\end{landscape}
+
+% Pendiente: añadir capturas/EfficientCausalAccess.png cuando el artículo
+% de Lima y colaboradores se cite en el análisis comparativo del informe.
 
 \end{document}

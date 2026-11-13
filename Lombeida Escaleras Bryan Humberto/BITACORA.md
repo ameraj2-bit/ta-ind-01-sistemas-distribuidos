@@ -53,3 +53,16 @@
 **Solución:** Se compiló en un directorio temporal con una caché de TeX escribible y se copió únicamente el PDF resultante a esta carpeta. El contenido de la carátula queda pendiente de revisión.
 
 **Tiempo dedicado:** 2 horas.
+
+## Sesión 5: 13 de noviembre de 2026
+
+**Actividades realizadas**
+
+- Se desarrollaron en `main.tex` los apartados de CAP y PACELC, modelos de comunicación y tolerancia a fallos de Google Spanner, con citas y una distinción entre las capacidades documentadas de Spanner y los resultados de otros artículos.
+- Se incorporó el bosquejo a mano de una escritura en Spanner como Anexo A y se ubicaron dos capturas de lectura anotadas en el Anexo B, con sus respectivas descripciones y citas. Se preparó el anexo de capturas en orientación horizontal para facilitar su lectura.
+
+**Problema encontrado:** Las capturas necesitaban espacio suficiente para leerse y era necesario evitar atribuir a Spanner mecanismos o resultados estudiados en otros sistemas.
+
+**Solución:** Se dispusieron las capturas del Anexo B en páginas horizontales y se precisó en el texto qué afirmaciones corresponden a Spanner y cuáles se usan solo como apoyo conceptual. La captura de *Efficient Causal Access* queda pendiente de ubicar cuando se cite ese artículo en el análisis comparativo.
+
+**Tiempo dedicado:** 3 horas.

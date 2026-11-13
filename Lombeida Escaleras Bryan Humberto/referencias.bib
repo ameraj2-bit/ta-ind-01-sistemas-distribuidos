@@ -1,23 +1,105 @@
-@article{zhang_vldb24,
-        title = {{Differentially Private Stream Processing at Scale}},
-        author = {Zhang, Bing and Doroshenko, Vadym and Kairouz, Peter and Steinke, Thomas and Thakurta, Abhradeep and Ma, Ziyin and Cohen, Eidan and Apte, Himani and Spacek, Jodi},
-        journal = {PVLDB},
-        series = {{VLDB} '24},
-        volume = {17},
-        number = {12},
-        pages = {4145--4158},
-        doi = {10.14778/3685800.3685833},
-        url = {https://doi.org/10.14778/3685800.3685833},
-        year = {2024}
+@article{ZhangEtAl2024D2PC,
+  author       = {Zhang, Zihao and Hu, Huiqi and Zhou, Xuan and Tu, Yaofeng and Qian, Weining and Zhou, Aoying},
+  title        = {Fast Commitment for Geo-Distributed Transactions via Decentralized Co-coordinators},
+  journaltitle = {Proceedings of the VLDB Endowment},
+  year         = {2024},
+  volume       = {17},
+  number       = {10},
+  pages        = {2555--2567},
+  doi          = {10.14778/3675034.3675046},
+  url          = {https://www.vldb.org/pvldb/vol17/p2555-hu.pdf}
 }
 
-@article{DeLimaMeloEtAl2021NoSQL,
-  author       = {De Lima Melo, Felipe F. and Marques Gouveia, Roberta M. and De Alencar, Andrêza L. and Batista, Maria da Conceição M. and Santos Neto, Ademir B. and Ferreira, Tiago A. E.},
-  title        = {Performance Analysis of {NoSQL} Databases with Large Volumes of Open Educational Data},
-  journaltitle = {International Journal of Computer Applications},
-  year         = {2021},
-  volume       = {174},
-  number       = {29},
-  pages        = {9--17},
-  doi          = {10.5120/ijca2021921219}
+@article{LiangEtAl2025HoliPaxos,
+  author       = {Liang, Zhiying and Jabrayilov, Vahab and Aghayev, Abutalib and Charapko, Aleksey},
+  title        = {{HoliPaxos}: Towards More Predictable Performance in State Machine Replication},
+  journaltitle = {Proceedings of the VLDB Endowment},
+  year         = {2025},
+  volume       = {18},
+  number       = {8},
+  pages        = {2505--2518},
+  doi          = {10.14778/3742728.3742744},
+  url          = {https://www.vldb.org/pvldb/vol18/p2505-charapko.pdf}
+}
+
+@article{LimaEtAl2023CausalAccess,
+  author       = {Lima, Stanley and Araujo, Filipe and de Oliveira Guerreiro, Miguel and Correia, Jaime and Bento, Andre and Barbosa, Raul},
+  title        = {Efficient Causal Access in Geo-Replicated Storage Systems},
+  journaltitle = {Journal of Grid Computing},
+  year         = {2023},
+  volume       = {21},
+  eid          = {8},
+  doi          = {10.1007/s10723-022-09640-z},
+  url          = {https://link.springer.com/article/10.1007/s10723-022-09640-z}
+}
+
+@online{GoogleSpannerReplication,
+  author  = {{Google Cloud}},
+  title   = {Replication},
+  url     = {https://docs.cloud.google.com/spanner/docs/replication},
+  urldate = {2026-11-12}
+}
+
+@online{GoogleSpannerPreSplitting,
+  author  = {{Google Cloud}},
+  title   = {Pre-splitting overview},
+  url     = {https://docs.cloud.google.com/spanner/docs/pre-splitting-overview},
+  urldate = {2026-11-12}
+}
+
+@online{GoogleSpannerTransactions,
+  author  = {{Google Cloud}},
+  title   = {Transactions overview},
+  url     = {https://docs.cloud.google.com/spanner/docs/transactions},
+  urldate = {2026-11-12}
+}
+
+@online{GoogleSpannerAPIs,
+  author  = {{Google Cloud}},
+  title   = {Overview of APIs, client libraries, and ORM drivers},
+  url     = {https://docs.cloud.google.com/spanner/docs/api-libraries-overview},
+  urldate = {2026-11-12}
+}
+
+@online{GoogleSpannerRetries,
+  author  = {{Google Cloud}},
+  title   = {Configure custom timeouts and retries},
+  url     = {https://docs.cloud.google.com/spanner/docs/custom-timeout-and-retry},
+  urldate = {2026-11-12}
+}
+
+@online{AWSGlobalTables,
+  author  = {{Amazon Web Services}},
+  title   = {How {DynamoDB} global tables work},
+  url     = {https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/V2globaltables_HowItWorks.html},
+  urldate = {2026-11-12}
+}
+
+@inproceedings{ElhemaliEtAl2022DynamoDB,
+  author    = {Elhemali, Mostafa and Gallagher, Niall and Gordon, Nicholas and Idziorek, Joseph and Krog, Richard and Lazier, Colin and Mo, Erben and Mritunjai, Akhilesh and Perianayagam, Somu and Rath, Tim and Sivasubramanian, Swami and Sorenson, James Christopher III and Sosothikul, Sroaj and Terry, Doug and Vig, Akshat},
+  title     = {Amazon {DynamoDB}: A Scalable, Predictably Performant, and Fully Managed {NoSQL} Database Service},
+  booktitle = {2022 USENIX Annual Technical Conference (USENIX ATC 22)},
+  year      = {2022},
+  pages     = {1037--1048},
+  publisher = {USENIX Association},
+  url       = {https://www.usenix.org/conference/atc22/presentation/elhemali}
+}
+
+@inproceedings{IdziorekEtAl2023DynamoDB,
+  author    = {Idziorek, Joseph and Keyes, Alex and Lazier, Colin and Perianayagam, Somu and Ramanathan, Prithvi and Sorenson, James Christopher III and Terry, Doug and Vig, Akshat},
+  title     = {Distributed Transactions at Scale in Amazon {DynamoDB}},
+  booktitle = {2023 USENIX Annual Technical Conference (USENIX ATC 23)},
+  year      = {2023},
+  pages     = {705--717},
+  publisher = {USENIX Association},
+  isbn      = {978-1-939133-35-9},
+  url       = {https://www.usenix.org/conference/atc23/presentation/idziorek}
+}
+
+@online{GoogleSpannerIncident2023,
+  author  = {{Google Cloud Service Health}},
+  title   = {Cloud Spanner unavailability or elevated errors: Incident report, 4 July 2023},
+  date    = {2023-07-04},
+  url     = {https://status.cloud.google.com/incidents/Sen4ACpGsFmquzb8FxRj},
+  urldate = {2026-11-12}
 }

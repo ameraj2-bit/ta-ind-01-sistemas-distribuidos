@@ -1,0 +1,310 @@
+﻿**********************
+Inicio de la transcripción de Windows PowerShell
+Hora de inicio: 20261112210905
+Nombre de usuario: DESKTOP-BSCEF4D\PC
+Usuario RunAs: DESKTOP-BSCEF4D\PC
+Nombre de la configuración: 
+Máquina: DESKTOP-BSCEF4D (Microsoft Windows NT 10.0.26200.0)
+Aplicación host: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+Id. de proceso: 21864
+PSVersion: 5.1.26100.9818
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9818
+BuildVersion: 10.0.26100.9818
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+La transcripción ha comenzado. El archivo de salida es .\resultado-experimento.txt
+PS C:\Users\PC\consul-experimento> whoami
+desktop-bscef4d\pc
+PS C:\Users\PC\consul-experimento> Get-Date
+
+jueves, 12 de noviembre de 2026 21:09:55
+
+
+PS C:\Users\PC\consul-experimento> docker exec consul1 consul kv put prueba/clave "valor-antes-de-la-falla"
+Success! Data written to: prueba/clave
+PS C:\Users\PC\consul-experimento> docker exec consul1 consul kv get prueba/clave
+valor-antes-de-la-falla
+PS C:\Users\PC\consul-experimento> docker exec consul1 consul operator raft list-peers
+Node     ID                                    Address          State     Voter  RaftProtocol  Commit Index  Trails Leader By
+consul2  1f7fc837-1bd7-9769-582f-9105637815e3  172.20.0.4:8300  leader    true   3             98            -
+consul1  8a0a3928-6b32-462b-05a6-28798a848857  172.20.0.3:8300  follower  true   3             98            0 commits
+consul3  6fab5cdc-7c1e-32d2-e16a-929709cb2d20  172.20.0.2:8300  follower  true   3             98            0 commits
+PS C:\Users\PC\consul-experimento> whoami
+desktop-bscef4d\pc
+PS C:\Users\PC\consul-experimento> docker stop consul2
+consul2
+PS C:\Users\PC\consul-experimento> Start-Sleep -Seconds 5
+PS C:\Users\PC\consul-experimento> Get-Date
+
+jueves, 12 de noviembre de 2026 21:14:05
+
+
+PS C:\Users\PC\consul-experimento> docker ps -a
+CONTAINER ID   IMAGE                                 COMMAND                  CREATED          STATUS                      PORTS
+               NAMES
+c737abbc97e7   hashicorp/consul:1.20                 "docker-entrypoint.s…"   12 minutes ago   Exited (1) 38 seconds ago
+               consul2
+9614626337ce   hashicorp/consul:1.20                 "docker-entrypoint.s…"   12 minutes ago   Up 12 minutes               0.0.0.0:8502->8500/tcp, [::]:85
+02->8500/tcp   consul3
+3243aa91838a   hashicorp/consul:1.20                 "docker-entrypoint.s…"   12 minutes ago   Up 12 minutes               0.0.0.0:8500->8500/tcp, [::]:85
+00->8500/tcp   consul1
+7ab579b0a746   hello-world                           "/hello"                 25 minutes ago   Exited (0) 25 minutes ago
+               frosty_stonebraker
+37c170662cec   postgres:16-alpine                    "docker-entrypoint.s…"   2 months ago     Exited (0) 2 months ago
+               margeniq_postgres
+7861005bf97f   monetdb/monetdb:latest                "entrypoint.sh"          2 months ago     Exited (137) 2 months ago
+               margeniq_monetdb
+c04d0ef9682e   voltservice-airflow:2.9.3-etl         "/usr/bin/dumb-init …"   3 months ago     Exited (137) 2 months ago
+               voltservice-airflow-scheduler
+4a0ffeb849ff   voltservice-airflow:2.9.3-etl         "/bin/bash -c 'mkdir…"   3 months ago     Exited (0) 2 months ago
+               voltservice-airflow-init
+7638eb1ae1d3   voltservice-airflow:2.9.3-etl         "/usr/bin/dumb-init …"   3 months ago     Exited (137) 2 months ago
+               voltservice-airflow-webserver
+553aefeb1688   postgres:13                           "docker-entrypoint.s…"   3 months ago     Exited (0) 2 months ago
+               voltservice-airflow-postgres
+9b302a5656a5   ghcr.io/muchobien/pocketbase:0.38.0   "/usr/local/bin/entr…"   4 months ago     Exited (0) 2 months ago
+               voltservice-pocketbase
+df71b76c23a3   monetdb/monetdb:latest                "entrypoint.sh"          4 months ago     Exited (137) 2 months ago
+               voltservice-monetdb
+1f1992d8f0df   monetdb/monetdb                       "entrypoint.sh"          6 months ago     Exited (137) 4 months ago
+               hungry_wright
+PS C:\Users\PC\consul-experimento> docker exec consul1 consul operator raft list-peers
+Node     ID                                    Address          State     Voter  RaftProtocol  Commit Index  Trails Leader By
+consul1  8a0a3928-6b32-462b-05a6-28798a848857  172.20.0.3:8300  leader    true   3             132           -
+consul3  6fab5cdc-7c1e-32d2-e16a-929709cb2d20  172.20.0.2:8300  follower  true   3             132           0 commits
+PS C:\Users\PC\consul-experimento> docker exec consul1 consul kv get prueba/clave
+valor-antes-de-la-falla
+PS C:\Users\PC\consul-experimento> docker exec consul1 consul kv put prueba/clave "valor-despues-de-la-falla"
+Success! Data written to: prueba/clave
+PS C:\Users\PC\consul-experimento> docker exec consul1 consul kv get prueba/clave
+valor-despues-de-la-falla
+PS C:\Users\PC\consul-experimento> whoami
+desktop-bscef4d\pc
+PS C:\Users\PC\consul-experimento> Get-Date
+
+jueves, 12 de noviembre de 2026 21:18:42
+
+
+PS C:\Users\PC\consul-experimento> docker exec consul1 consul members
+Node     Address          Status  Type    Build   Protocol  DC   Partition  Segment
+consul1  172.20.0.3:8301  alive   server  1.20.6  2         dc1  default    <all>
+consul2  172.20.0.4:8301  left    server  1.20.6  2         dc1  default    <all>
+consul3  172.20.0.2:8301  alive   server  1.20.6  2         dc1  default    <all>
+PS C:\Users\PC\consul-experimento> docker logs consul2 --tail 15
+2026-11-13T02:13:39.082Z [WARN]  agent.server.controller-runtime: error received from watch: controller=consul.io/exported-services-v1-compat managed_type=multicluster.v2.ComputedExportedServices error
+="rpc error: code = Canceled desc = context canceled"
+2026-11-13T02:13:39.082Z [WARN]  agent.server.controller-runtime: error received from watch: controller=consul.io/exported-services-v1-compat managed_type=multicluster.v2.ComputedExportedServices error
+="rpc error: code = Canceled desc = context canceled"
+2026-11-13T02:13:39.083Z [WARN]  agent.server.serf.wan: serf: Shutdown without a Leave
+2026-11-13T02:13:39.083Z [INFO]  agent.router.manager: shutting down
+2026-11-13T02:13:39.083Z [INFO]  agent.router.manager: shutting down
+2026-11-13T02:13:39.083Z [INFO]  agent.server.raft: aborting pipeline replication: peer="{Voter 6fab5cdc-7c1e-32d2-e16a-929709cb2d20 172.20.0.2:8300}"
+2026-11-13T02:13:39.083Z [INFO]  agent.server.raft: aborting pipeline replication: peer="{Voter 8a0a3928-6b32-462b-05a6-28798a848857 172.20.0.3:8300}"
+2026-11-13T02:13:39.084Z [INFO]  agent: consul server down
+2026-11-13T02:13:39.084Z [INFO]  agent: shutdown complete
+2026-11-13T02:13:39.084Z [INFO]  agent.dns: Stopping server: protocol=DNS address=0.0.0.0:8600 network=tcp
+2026-11-13T02:13:39.084Z [INFO]  agent.dns: Stopping server: protocol=DNS address=0.0.0.0:8600 network=udp
+2026-11-13T02:13:39.084Z [INFO]  agent: Stopping server: address=[::]:8500 network=tcp protocol=http
+2026-11-13T02:13:39.084Z [INFO]  agent: Waiting for endpoints to shut down
+2026-11-13T02:13:39.084Z [INFO]  agent: Endpoints down
+2026-11-13T02:13:39.084Z [INFO]  agent: Exit code: code=1
+PS C:\Users\PC\consul-experimento> whoami
+desktop-bscef4d\pc
+PS C:\Users\PC\consul-experimento> Get-Date
+
+jueves, 12 de noviembre de 2026 21:22:01
+
+
+PS C:\Users\PC\consul-experimento> docker start consul2
+consul2
+PS C:\Users\PC\consul-experimento> Start-Sleep -Seconds 10
+PS C:\Users\PC\consul-experimento> docker exec consul1 consul members
+Node     Address          Status  Type    Build   Protocol  DC   Partition  Segment
+consul1  172.20.0.3:8301  alive   server  1.20.6  2         dc1  default    <all>
+consul2  172.20.0.4:8301  alive   server  1.20.6  2         dc1  default    <all>
+consul3  172.20.0.2:8301  alive   server  1.20.6  2         dc1  default    <all>
+PS C:\Users\PC\consul-experimento> docker exec consul1 consul operator raft list-peers
+Node     ID                                    Address          State     Voter  RaftProtocol  Commit Index  Trails Leader By
+consul1  8a0a3928-6b32-462b-05a6-28798a848857  172.20.0.3:8300  leader    true   3             195           -
+consul3  6fab5cdc-7c1e-32d2-e16a-929709cb2d20  172.20.0.2:8300  follower  true   3             195           0 commits
+consul2  1f7fc837-1bd7-9769-582f-9105637815e3  172.20.0.4:8300  follower  true   3             195           0 commits
+PS C:\Users\PC\consul-experimento> docker exec consul2 consul kv get prueba/clave
+valor-despues-de-la-falla
+PS C:\Users\PC\consul-experimento> whoami
+desktop-bscef4d\pc
+PS C:\Users\PC\consul-experimento> Get-Date
+
+jueves, 12 de noviembre de 2026 21:26:25
+
+
+PS C:\Users\PC\consul-experimento> docker kill consul1
+consul1
+PS C:\Users\PC\consul-experimento> Get-Date
+
+jueves, 12 de noviembre de 2026 21:26:42
+
+
+PS C:\Users\PC\consul-experimento> Start-Sleep -Seconds 5
+PS C:\Users\PC\consul-experimento> docker exec consul2 consul members
+Node     Address          Status  Type    Build   Protocol  DC   Partition  Segment
+consul1  172.20.0.3:8301  left    server  1.20.6  2         dc1  default    <all>
+consul2  172.20.0.4:8301  alive   server  1.20.6  2         dc1  default    <all>
+consul3  172.20.0.2:8301  alive   server  1.20.6  2         dc1  default    <all>
+PS C:\Users\PC\consul-experimento> docker exec consul2 consul operator raft list-peers
+Node     ID                                    Address          State     Voter  RaftProtocol  Commit Index  Trails Leader By
+consul3  6fab5cdc-7c1e-32d2-e16a-929709cb2d20  172.20.0.2:8300  follower  true   3             229           0 commits
+consul2  1f7fc837-1bd7-9769-582f-9105637815e3  172.20.0.4:8300  leader    true   3             229           -
+PS C:\Users\PC\consul-experimento> Get-Date
+
+jueves, 12 de noviembre de 2026 21:27:27
+
+
+PS C:\Users\PC\consul-experimento> whoami
+desktop-bscef4d\pc
+PS C:\Users\PC\consul-experimento> docker exec consul2 consul operator autopilot get-config
+CleanupDeadServers = true
+LastContactThreshold = 200ms
+MaxTrailingLogs = 250
+MinQuorum = 0
+ServerStabilizationTime = 10s
+RedundancyZoneTag = ""
+DisableUpgradeMigration = false
+UpgradeVersionTag = ""
+PS C:\Users\PC\consul-experimento> docker logs consul2 2>&1 | Select-String -Pattern "consul1|election|leader|failed|removing" | Select-Object -Last 20
+
+2026-11-13T02:26:44.642Z [WARN]  agent.cache: handling error in Cache.Notify: cache-type=connect-ca-root error="rpc error getting client: failed to get conn: rpc error: lead thread didn't get
+connection" index=9
+2026-11-13T02:26:44.652Z [INFO]  agent.server: deregistering member: member=consul1 partition=default reason=left
+2026-11-13T02:26:45.643Z [WARN]  agent: error getting server health from server: server=consul1 error="context deadline exceeded"
+2026-11-13T02:26:53.239Z [ERROR] agent.server.raft: failed to make requestVote RPC: target="{Voter 8a0a3928-6b32-462b-05a6-28798a848857 172.20.0.3:8300}" error="dial tcp
+172.20.0.4:0->172.20.0.3:8300: i/o timeout" term=4
+2026-11-13T02:26:53.250Z [ERROR] agent.server.raft: failed to make requestVote RPC: target="{Voter 8a0a3928-6b32-462b-05a6-28798a848857 172.20.0.3:8300}" error="dial tcp
+172.20.0.4:0->172.20.0.3:8300: i/o timeout" term=4
+2026-11-13T02:26:53.257Z [ERROR] agent.server.raft: failed to appendEntries to: peer="{Voter 8a0a3928-6b32-462b-05a6-28798a848857 172.20.0.3:8300}" error="dial tcp 172.20.0.4:0->172.20.0.3:8300: i/o
+timeout"
+2026-11-13T02:26:53.266Z [ERROR] agent.server.raft: failed to heartbeat to: peer=172.20.0.3:8300 backoff time=10ms error="dial tcp 172.20.0.4:0->172.20.0.3:8300: i/o timeout"
+2026-11-13T02:26:59.641Z [INFO]  agent.server.memberlist.wan: memberlist: Suspect consul1.dc1 has failed, no acks received
+2026-11-13T02:27:03.269Z [ERROR] agent.server.raft: failed to appendEntries to: peer="{Voter 8a0a3928-6b32-462b-05a6-28798a848857 172.20.0.3:8300}" error="dial tcp 172.20.0.4:0->172.20.0.3:8300: i/o
+timeout"
+2026-11-13T02:27:03.277Z [ERROR] agent.server.raft: failed to heartbeat to: peer=172.20.0.3:8300 backoff time=10ms error="dial tcp 172.20.0.4:0->172.20.0.3:8300: i/o timeout"
+2026-11-13T02:27:09.640Z [INFO]  agent.server.memberlist.wan: memberlist: Suspect consul1.dc1 has failed, no acks received
+2026-11-13T02:27:13.280Z [ERROR] agent.server.raft: failed to appendEntries to: peer="{Voter 8a0a3928-6b32-462b-05a6-28798a848857 172.20.0.3:8300}" error="dial tcp 172.20.0.4:0->172.20.0.3:8300: i/o
+timeout"
+2026-11-13T02:27:14.162Z [ERROR] agent.server.raft: failed to heartbeat to: peer=172.20.0.3:8300 backoff time=10ms error="dial tcp 172.20.0.4:0->172.20.0.3:8300: i/o timeout"
+2026-11-13T02:27:14.641Z [INFO]  agent.server.memberlist.wan: memberlist: Marking consul1.dc1 as failed, suspect timeout reached (0 peer confirmations)
+2026-11-13T02:27:14.642Z [INFO]  agent.server.serf.wan: serf: EventMemberLeave: consul1.dc1 172.20.0.3
+2026-11-13T02:27:14.642Z [INFO]  agent.server: Handled event for server in area: event=member-leave server=consul1.dc1 area=wan
+2026-11-13T02:27:19.640Z [INFO]  agent.server.memberlist.wan: memberlist: Suspect consul1.dc1 has failed, no acks received
+2026-11-13T02:27:43.269Z [INFO]  agent.server.raft.logstore.verifier: verification checksum OK: elapsed="182.561┬Ás" leaderChecksum=8676566ee5fa7baa rangeEnd=232 rangeStart=220
+readChecksum=8676566ee5fa7baa
+2026-11-13T02:28:43.270Z [INFO]  agent.server.raft.logstore.verifier: verification checksum OK: elapsed="160.637┬Ás" leaderChecksum=3f7f200440207a68 rangeEnd=239 rangeStart=232
+readChecksum=3f7f200440207a68
+2026-11-13T02:29:43.267Z [INFO]  agent.server.raft.logstore.verifier: verification checksum OK: elapsed="63.015┬Ás" leaderChecksum=d09ecc1e7c492e14 rangeEnd=246 rangeStart=239
+readChecksum=d09ecc1e7c492e14
+
+
+PS C:\Users\PC\consul-experimento> docker logs consul2 2>&1 | Select-String -Pattern "updating configuration|RemoveServer|autopilot" | Select-Object -Last 10
+
+2026-11-13T02:01:43.651Z [INFO]  agent.server.autopilot: reconciliation now disabled
+2026-11-13T02:01:49.589Z [INFO]  agent.server.autopilot: reconciliation now enabled
+2026-11-13T02:13:39.082Z [INFO]  agent.server.autopilot: reconciliation now disabled
+2026-11-13T02:22:14.640Z [INFO]  agent.server.autopilot: reconciliation now disabled
+2026-11-13T02:26:43.265Z [INFO]  agent.server.autopilot: reconciliation now enabled
+2026-11-13T02:26:44.642Z [INFO]  agent.server.autopilot: Attempting removal of failed server node: id=8a0a3928-6b32-462b-05a6-28798a848857 name=consul1 address=172.20.0.3:8300
+2026-11-13T02:26:44.642Z [INFO]  agent.server.raft: updating configuration: command=RemoveServer server-id=8a0a3928-6b32-462b-05a6-28798a848857 server-addr= servers="[{Suffrage:Voter
+ID:6fab5cdc-7c1e-32d2-e16a-929709cb2d20 Address:172.20.0.2:8300} {Suffrage:Voter ID:1f7fc837-1bd7-9769-582f-9105637815e3 Address:172.20.0.4:8300}]"
+2026-11-13T02:26:44.652Z [INFO]  agent.server.autopilot: removed server: id=8a0a3928-6b32-462b-05a6-28798a848857
+
+
+PS C:\Users\PC\consul-experimento> whoami
+desktop-bscef4d\pc
+PS C:\Users\PC\consul-experimento> Get-Date
+
+jueves, 12 de noviembre de 2026 21:36:51
+
+
+PS C:\Users\PC\consul-experimento> docker inspect consul1 --format '{{.State.FinishedAt}}'
+2026-11-13T02:26:34.235548951Z
+PS C:\Users\PC\consul-experimento> whoami
+desktop-bscef4d\pc
+PS C:\Users\PC\consul-experimento> Get-Date
+
+jueves, 12 de noviembre de 2026 21:39:54
+
+
+PS C:\Users\PC\consul-experimento> docker start consul1
+consul1
+PS C:\Users\PC\consul-experimento> Start-Sleep -Seconds 15
+PS C:\Users\PC\consul-experimento> docker exec consul2 consul members
+Node     Address          Status  Type    Build   Protocol  DC   Partition  Segment
+consul1  172.20.0.3:8301  alive   server  1.20.6  2         dc1  default    <all>
+consul2  172.20.0.4:8301  alive   server  1.20.6  2         dc1  default    <all>
+consul3  172.20.0.2:8301  alive   server  1.20.6  2         dc1  default    <all>
+PS C:\Users\PC\consul-experimento> docker exec consul2 consul operator raft list-peers
+Node     ID                                    Address          State     Voter  RaftProtocol  Commit Index  Trails Leader By
+consul3  6fab5cdc-7c1e-32d2-e16a-929709cb2d20  172.20.0.2:8300  follower  true   3             321           0 commits
+consul2  1f7fc837-1bd7-9769-582f-9105637815e3  172.20.0.4:8300  leader    true   3             321           -
+consul1  8a0a3928-6b32-462b-05a6-28798a848857  172.20.0.3:8300  follower  true   3             321           0 commits
+PS C:\Users\PC\consul-experimento> whoami
+desktop-bscef4d\pc
+PS C:\Users\PC\consul-experimento> Get-Date
+
+jueves, 12 de noviembre de 2026 21:43:27
+
+
+PS C:\Users\PC\consul-experimento> docker kill consul1 consul3
+consul1
+consul3
+PS C:\Users\PC\consul-experimento> Start-Sleep -Seconds 15
+PS C:\Users\PC\consul-experimento> Get-Date
+
+jueves, 12 de noviembre de 2026 21:44:07
+
+
+PS C:\Users\PC\consul-experimento> docker exec consul2 consul operator raft list-peers
+Error getting peers: Failed to retrieve raft configuration: Unexpected response code: 500 (No cluster leader)
+PS C:\Users\PC\consul-experimento> docker exec consul2 consul kv put prueba/clave "valor-sin-quorum"
+Error! Failed writing data: Unexpected response code: 500 (No cluster leader)
+PS C:\Users\PC\consul-experimento> docker exec consul2 consul kv get prueba/clave
+Error querying Consul agent: Unexpected response code: 500 (No cluster leader)
+PS C:\Users\PC\consul-experimento> docker exec consul2 consul kv get -stale prueba/clave
+valor-despues-de-la-falla
+PS C:\Users\PC\consul-experimento> Get-Date
+
+jueves, 12 de noviembre de 2026 21:45:27
+
+
+PS C:\Users\PC\consul-experimento> whoami
+desktop-bscef4d\pc
+PS C:\Users\PC\consul-experimento> Get-Date
+
+jueves, 12 de noviembre de 2026 21:47:51
+
+
+PS C:\Users\PC\consul-experimento> docker start consul1 consul3
+consul1
+consul3
+PS C:\Users\PC\consul-experimento> Start-Sleep -Seconds 20
+PS C:\Users\PC\consul-experimento> docker exec consul2 consul members
+Node     Address          Status  Type    Build   Protocol  DC   Partition  Segment
+consul1  172.20.0.2:8301  alive   server  1.20.6  2         dc1  default    <all>
+consul2  172.20.0.4:8301  alive   server  1.20.6  2         dc1  default    <all>
+consul3  172.20.0.3:8301  alive   server  1.20.6  2         dc1  default    <all>
+PS C:\Users\PC\consul-experimento> docker exec consul2 consul operator raft list-peers
+Node     ID                                    Address          State     Voter  RaftProtocol  Commit Index  Trails Leader By
+consul2  1f7fc837-1bd7-9769-582f-9105637815e3  172.20.0.4:8300  leader    true   3             362           -
+consul1  8a0a3928-6b32-462b-05a6-28798a848857  172.20.0.2:8300  follower  true   3             362           0 commits
+consul3  6fab5cdc-7c1e-32d2-e16a-929709cb2d20  172.20.0.3:8300  follower  true   3             362           0 commits
+PS C:\Users\PC\consul-experimento> docker exec consul2 consul kv put prueba/clave "valor-tras-recuperar-quorum"
+Success! Data written to: prueba/clave
+PS C:\Users\PC\consul-experimento> docker exec consul2 consul kv get prueba/clave
+valor-tras-recuperar-quorum
+PS C:\Users\PC\consul-experimento> Stop-Transcript
+**********************
+Fin de la transcripción de Windows PowerShell
+Hora de finalización: 20261112214918
+**********************

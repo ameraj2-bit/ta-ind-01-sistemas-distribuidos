@@ -2,7 +2,7 @@
 
 Asignatura: Sistemas Distribuidos (Unidad 1). Universidad Técnica Estatal de Quevedo.
 
-Sistema analizado: Apache Cassandra (comparado con MongoDB).
+Sistema analizado: HDFS (Apache Hadoop Distributed File System), comparado con Ceph.
 
 ## Video de sustentación
 

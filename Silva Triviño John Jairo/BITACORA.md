@@ -2,9 +2,9 @@
 
 ## 2026-11-12
 
-- **Qué hice:** Leí completa la actividad TA-IND-01 y anoté los criterios de calificación cero y las evidencias de autoría obligatorias. Elegí el sistema a analizar: Apache Cassandra, para compararlo con MongoDB. Revisé qué sistemas escogieron mis compañeros de grupo para no repetir el mío. Revisé la estructura del repositorio compartido del grupo y creé mi carpeta individual con su README y esta bitácora.
-- **Problema encontrado:** No tenía claro si el trabajo debía ir en un repositorio propio o en el del grupo, porque la entrega al SGA la hace un solo integrante.
-- **Cómo lo resolví:** Entendí que la tarea está como grupal en el SGA y que se sube una sola URL, así que usamos un repositorio con una carpeta por integrante. Dejé mi carpeta autosuficiente para que compile por separado.
-- **Uso de herramientas:** Usé Claude (Anthropic) para entender los requisitos de la actividad.
-- **Tiempo dedicado:** 25 min
-- **Siguiente paso:** Hacer el boceto de la arquitectura y levantar un clúster de Cassandra de 3 nodos con Docker.
+- **Qué hice (tarde):** Estudié con ayuda de Claude la arquitectura de Apache Cassandra (anillo de nodos, replicación, coordinador, niveles de consistencia, ruta de escritura, gossip) y preparé por escrito el guion de mi boceto, con mis propias respuestas a preguntas de comprobación. [Ajusta o añade lo que realmente hiciste.]
+- **Problema encontrado:** Al revisar los mensajes del curso vi que otros compañeros ya habían registrado Cassandra, como sistema principal y como sistema de comparación, y que MongoDB también estaba tomado.
+- **Cómo lo resolví:** Cambié el sistema para no repetir el de otros estudiantes. Elegí HDFS como sistema principal, comparado con Ceph, y comprobé que ninguno de los dos estaba en la lista de sistemas ya registrados. Actualicé el README de mi carpeta y el principal.
+- **Uso de herramientas:** Usé Claude (Anthropic) para entender los requisitos, estudiar la arquitectura de Cassandra, proponer HDFS con Ceph como alternativa y preparar los textos de arranque del repositorio. Las entradas de esta bitácora las escribo yo.
+- **Tiempo dedicado:** 2:35h
+- **Siguiente paso:** Estudiar la arquitectura de HDFS, hacer a mano el boceto de su arquitectura y levantar un clúster con un NameNode y 3 DataNodes en Docker.

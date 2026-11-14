@@ -64,6 +64,22 @@ La Figura~\ref{fig:arquitectura-redis} resume la topología descrita: los nodos 
 
 \section{CAP y PACELC}
 
+\subsection{Análisis de Redis Cluster según CAP}
+
+El teorema CAP describe una limitación que se manifiesta cuando hay una partición de red: un sistema distribuido no puede garantizar simultáneamente consistencia fuerte y disponibilidad para todas las solicitudes. No significa que cada sistema tenga que elegir de forma permanente dos propiedades y abandonar la tercera; la decisión relevante se presenta durante la partición \cite{gilbert2002brewer}.
+
+En Redis Cluster, el resultado depende de qué nodos y ranuras quedan accesibles. El lado que conserva la mayoría de los primarios puede continuar si cuenta con réplicas elegibles para reemplazar a los primarios aislados. El lado minoritario puede aceptar escrituras durante una ventana limitada, pero, transcurrido el \textit{node timeout} sin contacto con la mayoría, deja de aceptar consultas de escritura. Además, con la configuración predeterminada de cobertura completa, la pérdida de cobertura de alguna ranura puede hacer que el clúster rechace escrituras \cite{redisClusterSpec,redisClusterScaling}.
+
+Esta restricción de disponibilidad no equivale a una garantía de consistencia fuerte. La replicación entre un primario y sus réplicas es asíncrona, por lo que un primario puede responder a una escritura antes de que una réplica la reciba. Si el primario falla y se promueve una réplica desactualizada, esa escritura confirmada puede perderse. Por ello, no es preciso clasificar Redis Cluster simplemente como CP o AP: durante una partición puede rechazar escrituras en el lado minoritario para limitar divergencias, pero no garantiza conservar todas las escrituras reconocidas \cite{redisClusterSpec,redisReplication}.
+
+\subsection{Análisis de Redis Cluster según PACELC}
+
+PACELC complementa CAP al distinguir el caso de partición (P), donde se contraponen disponibilidad (A) y consistencia (C), del funcionamiento normal (E), donde existe un intercambio entre latencia (L) y consistencia (C) \cite{abadi2012consistency}.
+
+En la rama P, Redis Cluster favorece la continuidad de las operaciones en el lado mayoritario cuando se cumplen las condiciones de quórum, cobertura de ranuras y disponibilidad de réplicas para el failover. En el lado minoritario limita las escrituras después del tiempo configurado. No obstante, las escrituras aceptadas antes de ese límite pueden perderse si el primario aislado es reemplazado por una réplica que no las recibió \cite{redisClusterSpec,redisClusterScaling}.
+
+En la rama E, el primario normalmente responde sin esperar confirmación de sus réplicas. Esta decisión reduce la espera de las escrituras, pero deja un intervalo en el que una falla puede causar pérdida de datos y permite que las réplicas tengan retraso respecto del primario. El comando \texttt{WAIT} permite esperar confirmaciones de réplicas y reducir la probabilidad de pérdida, aunque la documentación aclara que no convierte a Redis Cluster en un sistema de consistencia fuerte \cite{redisClusterSpec,redisClusterScaling}.
+
 \section{Modelos de comunicación}
 
 \section{Tolerancia a fallos}
@@ -75,6 +91,10 @@ La Figura~\ref{fig:arquitectura-redis} resume la topología descrita: los nodos 
 \section{Comparación con Valkey}
 
 \section{Postura crítica}
+
+Redis Cluster ofrece un compromiso práctico entre rendimiento, escalabilidad horizontal y recuperación ante fallos, pero esas propiedades no deben confundirse con una garantía de consistencia linealizable o de disponibilidad ante cualquier partición. Su comportamiento depende de la topología, de que existan réplicas elegibles, de la mayoría de primarios accesible y de parámetros como \texttt{cluster-node-timeout} y \texttt{cluster-require-full-coverage} \cite{redisClusterSpec,redisClusterScaling}.
+
+Desde una perspectiva de ingeniería, este diseño puede ser adecuado cuando la aplicación tolera una ventana acotada de indisponibilidad de escritura en nodos aislados y puede aceptar el riesgo documentado de perder algunas escrituras confirmadas. En cambio, si cada escritura reconocida debe conservarse y observarse de manera estrictamente consistente, es necesario evaluar mecanismos adicionales y considerar un sistema con garantías distintas. Esta valoración se basa en las propiedades documentadas de Redis Cluster; no representa resultados de los experimentos que se desarrollarán más adelante.
 
 \section{Conclusiones}
 

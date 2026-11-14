@@ -146,3 +146,18 @@
 **Solución:** Se documentó la secuencia de pdfLaTeX y Biber, se dejó identificado el espacio para el video y se indicaron las fuentes, las salidas de terminal y las capturas utilizadas para verificar el informe.
 
 **Tiempo dedicado:** 1 hora.
+
+
+## Sesión 11: 13 de noviembre de 2026
+
+**Actividades realizadas**
+
+- Se grabó y procesó el video de sustentación individual de la práctica experimental con Google Spanner y Docker.
+- En el video se explicó la arquitectura del entorno de pruebas, la consulta de saldos iniciales por gRPC, la detención del contenedor con comprobación de pérdida de disponibilidad por timeout (código 124).
+- Se publicó el video en YouTube y se actualizó `README.MD` con el enlace directo: `https://youtu.be/BIcxJ_XgQCg`.
+
+**Problema encontrado:** Ordenar la explicación técnica para cumplir con el tiempo mínimo requerido de 3 minutosy maximo 5 minutos abordando detalladamente cada comando y su fundamento en sistemas distribuidos.
+
+**Solución:** Se grago varias veces el paso a paso guiado por las cuatro figuras del experimento presentes en el informe, alcanzando la duración requerida y conectando los eventos observados con el modelo cliente-servidor gRPC y el teorema CAP.
+
+**Tiempo dedicado:** 30 minutos.

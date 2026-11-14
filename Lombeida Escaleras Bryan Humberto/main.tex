@@ -1,6 +1,7 @@
 \IfFileExists{IEEEtran.cls}{\documentclass[conference]{IEEEtran}}{\documentclass{article}}
 \usepackage{ieee-config}
 \usepackage{pdflscape}
+\usepackage{xcolor}
 \addbibresource{referencias.bib}
 
 \title{Análisis crítico de sistemas distribuidos: [sistema elegido]}
@@ -41,21 +42,40 @@ Viernes 13 de noviembre de 2026\par
 \vfill
 \end{titlepage}
 
-% 2. Resumen: redactar entre 150 y 200 palabras al finalizar el análisis.
+% 2. Resumen
 \begin{abstract}
-[Resumen: sistema analizado, enfoque y conclusiones principales; 150--200 palabras.]
+Este informe analiza Google Spanner, una base de datos distribuida que permite realizar transacciones sobre datos repartidos entre varias zonas o regiones. A partir de documentación técnica y estudios publicados, se examinan su arquitectura, la comunicación entre componentes, la tolerancia a fallos y las decisiones de consistencia, disponibilidad y latencia. La comparación con las tablas globales de Amazon DynamoDB en modo de consistencia eventual multirregional permite identificar qué garantías convienen según las necesidades de la aplicación. En el emulador oficial de Spanner se realizaron dos pruebas. La cancelación de una transferencia conservó ambos saldos y la confirmación aplicó el débito y el crédito. Al detener el contenedor, la consulta quedó sin respuesta dentro del límite de quince segundos. Tras reiniciarlo, fue necesario crear de nuevo la instancia y cargar los datos iniciales. El análisis indica que Spanner resulta adecuado cuando los cambios de una transacción deben observarse juntos. DynamoDB en el modo estudiado puede ajustarse mejor cuando se prioriza confirmar escrituras en una región y se aceptan lecturas temporalmente desactualizadas en otras.
 \end{abstract}
 
 % 3. Introducción
 \section{Introducción}
-% Problema que resuelve, usuarios, escala de operación y justificación de elección.
+Google Spanner aborda el problema de mantener datos coherentes cuando una aplicación crece y necesita repartirlos entre varias zonas o regiones. Por ejemplo, si una operación descuenta inventario y registra una reserva, ambos cambios deben confirmarse juntos. Spanner combina transacciones atómicas con replicación síncrona para ofrecer esas garantías sobre datos distribuidos \cite{GoogleSpannerTransactions,GoogleSpannerReplication}.
+
+Google utiliza Spanner en servicios como Gmail, YouTube y Google Fotos. Entre los clientes que Google Cloud menciona están Shopify y Mercado Libre. En enero de 2026, Google informó que Spanner manejaba más de 17 exabytes de datos y superaba los 6\,000 millones de consultas por segundo en picos de actividad. Estas cifras describen la escala que Google reportó para el sistema en conjunto \cite{ChatterjeeMathur2026Spanner}.
+
+Elegí Spanner porque su diseño permite estudiar una decisión concreta de los sistemas distribuidos: qué gana una aplicación al coordinar sus escrituras y qué ocurre si las réplicas dejan de comunicarse. La comparación con DynamoDB permite examinar esa decisión ante un modelo de replicación distinto. El emulador oficial también me permitió observar desde el cliente dos situaciones: la confirmación o cancelación de una transferencia y la interrupción de una consulta al detener el contenedor.
 
 % 4. Arquitectura del sistema
 \section{Arquitectura del sistema}
 \subsection{Componentes y funciones}
+La aplicación se comunica con Spanner mediante una API o una biblioteca cliente. En una configuración regional base, cada rango de datos, o \emph{split}, tiene tres réplicas con derecho a voto distribuidas en zonas distintas de la misma región. Una de ellas actúa como líder y coordina las escrituras de ese rango \cite{GoogleSpannerAPIs,GoogleSpannerReplication}.
+
 \subsection{Comunicación entre componentes}
+El servicio encamina la solicitud a la réplica líder. El líder registra el cambio, lo envía en paralelo a las otras réplicas con voto y espera el acuerdo de una mayoría antes de confirmar la escritura al cliente. En la configuración representada, el quórum es de dos votos de tres, incluido el del líder. Si una réplica queda fuera de servicio, las otras dos pueden seguir confirmando escrituras siempre que se comuniquen y cuenten con un líder \cite{GoogleSpannerReplication}.
+
 \subsection{Diagrama original y evolución desde el esquema a mano}
-% Insertar diagrama propio elaborado en draw.io o TikZ; remitir al Anexo A.
+El boceto del Anexo~A identifica la aplicación, el servicio, la réplica líder y dos réplicas adicionales. En la versión digital, el rango de datos deja de aparecer como un bloque separado y pasa a delimitar el grupo de réplicas que guardan sus copias. El diagrama también ubica las tres zonas dentro de una sola región y numera el recorrido desde la solicitud inicial hasta la respuesta al cliente. Las flechas azules muestran el envío de solicitudes y escrituras, las moradas muestran los votos y las verdes indican la confirmación.
+
+\par\noindent
+\begin{minipage}{\linewidth}
+\centering
+\setlength{\fboxsep}{5pt}
+\colorbox[HTML]{111827}{%
+  \includegraphics[width=\dimexpr\linewidth-2\fboxsep\relax]{figuras/Untitled Diagram.drawio.png}%
+}\par\smallskip
+\refstepcounter{figure}\label{fig:evolucion-spanner}
+{\small \textbf{\figurename~\thefigure.} Recorrido de una escritura en Spanner. Diagrama elaborado a partir del boceto del Anexo~A y de la documentación de Google Cloud \cite{GoogleSpannerReplication}.\par}
+\end{minipage}\par
 
 % 5. Análisis con conceptos de la Unidad 1
 \section{Análisis con los conceptos}
@@ -158,7 +178,11 @@ El experimento ilustra la comunicación cliente--servidor y el efecto observable
 
 % 7. Ejemplos del entorno del estudiante
 \section{Ejemplos del entorno del estudiante}
-% Desarrollar los ejemplos de la evidencia de autoría 3.
+\label{sec:ejemplos-entorno}
+
+\textbf{SGA de la UTEQ.} Durante la matrícula intenté acceder al módulo dentro de la franja asignada a mi semestre. La página tardaba mucho en cargar y el módulo siguió lento ese día, aunque logré completar la matrícula. Este caso ilustra la latencia percibida: pude realizar la operación, pero tuve que esperar más de lo habitual.
+
+\textbf{WhatsApp.} En ocasiones, al enviar varias imágenes, algunos archivos quedaron pendientes durante mucho tiempo y luego la aplicación mostró un error de envío. También me ocurrió con mensajes que siguieron sin enviarse después de reintentarlo. El caso ilustra la visibilidad de un fallo en la comunicación: la aplicación me avisó que el envío no se había completado y pude volver a intentarlo, aunque el reintento no siempre funcionó.
 
 % 8. Análisis comparativo
 \section{Análisis comparativo}
@@ -204,6 +228,8 @@ La comparación se centra en Spanner con una configuración multirregional y en 
 \end{minipage}\par
 
 \subsection{Discusión de resultados}
+Los ejemplos de la sección~\ref{sec:ejemplos-entorno} sirven para plantear dos preguntas separadas al comparar los sistemas: cuánto espera el usuario y si la operación logra completarse. La tabla~\ref{tab:spanner-dynamodb} aplica esa distinción al tiempo necesario para confirmar una escritura y a la posibilidad de hacerlo cuando se interrumpe la comunicación entre réplicas \cite{GoogleSpannerReplication,AWSGlobalTables}.
+
 Para una transferencia como la del experimento, importa cuándo una consulta puede ver juntos el débito y el crédito. En Spanner, una transacción de lectura y escritura con el aislamiento predeterminado aplica ambos cambios como una sola operación. En DynamoDB con MREC, esa garantía se cumple en la región que procesa la transacción. Mientras se propagan los cambios, una lectura en otra región puede mostrar el débito de una cuenta sin reflejar todavía el crédito en la otra. Si ver ambos cambios juntos es un requisito de la aplicación, esa diferencia pesa en la elección del sistema \cite{GoogleSpannerTransactions,AWSGlobalTables}.
 
 Para datos que se consultan por clave y pueden admitir un retraso entre regiones, la propagación asincrónica de MREC permite confirmar la escritura sin esperar a las réplicas remotas. Si dos regiones modifican el mismo elemento, se conserva la versión con la marca de tiempo interna más reciente. AWS también ofrece MRSC, que replica la escritura de forma sincrónica en al menos otra región antes de confirmarla y permite lecturas fuertes en cualquier réplica. La documentación de AWS indica que las tablas en modo MRSC no admiten operaciones transaccionales \cite{ElhemaliEtAl2022DynamoDB,AWSGlobalTables}.
@@ -229,9 +255,15 @@ Spanner tampoco sería la mejor opción si el requisito principal fuera seguir a
 
 % 10. Conclusiones
 \section{Conclusiones}
+En la transferencia de prueba, cancelar la transacción dejó los saldos en 100 y 50. Al confirmarla, los saldos cambiaron a 90 y 60 y el total se mantuvo en 150. Este resultado muestra por qué conviene agrupar el débito y el crédito en una sola transacción cuando la aplicación debe actualizar ambos saldos como una unidad \cite{GoogleSpannerTransactions}.
+
+La prueba de interrupción mostró que el estado del contenedor y la disponibilidad de los datos se deben verificar por separado. Mientras el contenedor estuvo detenido, la consulta quedó sin respuesta dentro del límite fijado de 15 segundos. Tras el reinicio, la instancia anterior ya no existía y la consulta volvió a funcionar después de crearla y cargar los saldos iniciales. El resultado corresponde al emulador, que guarda sus datos en memoria \cite{GoogleSpannerEmulator}.
+
+La comparación indica que Spanner es una opción adecuada si una consulta consistente debe poder observar juntos los cambios de una transacción y la aplicación puede asumir el tiempo que toma reunir el quórum de escritura. Para operaciones independientes que deben confirmarse en una región sin esperar la propagación y que admiten lecturas temporalmente desactualizadas en otras regiones, DynamoDB con consistencia eventual multirregional puede ajustarse mejor \cite{GoogleSpannerTransactions,GoogleSpannerReplication,AWSGlobalTables}.
 
 % 11. Declaración de uso de inteligencia artificial
 \section{Declaración de uso de inteligencia artificial}
+Se utilizó OpenAI Codex, con el modelo GPT-6.1-Sol en la revisión final, como apoyo para organizar el informe, mejorar la redacción, preparar el programa del experimento y elaborar la versión digital del diagrama. Las afirmaciones técnicas se cotejaron con las fuentes citadas y los resultados del experimento se comprobaron con las salidas de la terminal y las capturas originales. Los ejemplos del SGA y de WhatsApp proceden de observaciones personales del estudiante.
 
 % 12. Referencias: mínimo seis fuentes IEEE; verificar metadatos y DOI.
 \printbibliography[title={Referencias}]

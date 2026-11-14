@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="3AGd5ByclWiEITL1rzqn">
+    <mxGraphModel dx="1635" dy="919" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontColor=#172554;fontSize=30;fontStyle=1;" value="Cómo confirma una escritura Google Spanner" vertex="1">
+          <mxGeometry height="42" width="690" x="460" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="1" style="rounded=1;arcSize=4;fillColor=#f8fafc;strokeColor=#94a3b8;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="509" width="1068" x="324" y="122" as="geometry" />
+        </mxCell>
+        <mxCell id="4" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontColor=#172554;fontSize=20;fontStyle=1;" value="Instancia de Spanner · una región" vertex="1">
+          <mxGeometry height="28" width="1020" x="345" y="141" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="1" style="rounded=1;arcSize=5;dashed=1;dashPattern=6 4;fillColor=#eff6ff;strokeColor=#93c5fd;" value="" vertex="1">
+          <mxGeometry height="412" width="690" x="676" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="6" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontColor=#172554;fontSize=17;fontStyle=1;" value="Grupo de réplicas del mismo rango (split)" vertex="1">
+          <mxGeometry height="30" width="640" x="700" y="201" as="geometry" />
+        </mxCell>
+        <mxCell id="7" parent="1" style="rounded=1;arcSize=12;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=17;strokeWidth=1.5;spacing=8;fillColor=#ffffff;strokeColor=#64748b;" value="&lt;b&gt;Aplicación cliente&lt;/b&gt;&lt;br&gt;Solicita una escritura" vertex="1">
+          <mxGeometry height="102" width="188" x="48" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="8" parent="1" style="rounded=1;arcSize=12;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=17;strokeWidth=1.5;spacing=8;fillColor=#ffffff;strokeColor=#2563eb;" value="&lt;b&gt;Servicio / API&lt;/b&gt;&lt;br&gt;Enruta la solicitud" vertex="1">
+          <mxGeometry height="102" width="187" x="366" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="9" parent="1" style="rounded=1;arcSize=12;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=17;strokeWidth=1.5;spacing=8;fillColor=#dbeafe;strokeColor=#2563eb;" value="&lt;b&gt;Zona A · Réplica líder&lt;/b&gt;&lt;br&gt;Copia del rango&lt;br&gt;Registra y coordina" vertex="1">
+          <mxGeometry height="118" width="200" x="704" y="322" as="geometry" />
+        </mxCell>
+        <mxCell id="10" parent="1" style="rounded=1;arcSize=12;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=17;strokeWidth=1.5;spacing=8;fillColor=#ffffff;strokeColor=#2563eb;" value="&lt;b&gt;Zona B · Réplica&lt;/b&gt;&lt;br&gt;Copia del rango&lt;br&gt;Con derecho a voto" vertex="1">
+          <mxGeometry height="93" width="190" x="1142" y="253" as="geometry" />
+        </mxCell>
+        <mxCell id="11" parent="1" style="rounded=1;arcSize=12;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;fontSize=17;strokeWidth=1.5;spacing=8;fillColor=#ffffff;strokeColor=#2563eb;" value="&lt;b&gt;Zona C · Réplica&lt;/b&gt;&lt;br&gt;Copia del rango&lt;br&gt;Con derecho a voto" vertex="1">
+          <mxGeometry height="93" width="190" x="1142" y="422" as="geometry" />
+        </mxCell>
+        <mxCell id="12" edge="1" parent="1" source="7" style="edgeStyle=segmentEdgeStyle;rounded=0;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#2563eb;exitX=1;exitY=0.30;entryX=0;entryY=0.30" target="8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="13" edge="1" parent="1" source="8" style="edgeStyle=segmentEdgeStyle;rounded=0;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#2563eb;exitX=1;exitY=0.30;entryX=0;entryY=0.33" target="9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="14" edge="1" parent="1" source="9" style="edgeStyle=segmentEdgeStyle;rounded=0;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#2563eb;exitX=1;exitY=0.16;entryX=0;entryY=0.30" target="10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="955" y="341" />
+              <mxPoint x="955" y="281" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15" edge="1" parent="1" source="10" style="edgeStyle=segmentEdgeStyle;rounded=0;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#7e22ce;exitX=0;exitY=0.70;entryX=1;entryY=0.38;dashed=1;dashPattern=6 4" target="9">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="974" y="318" />
+              <mxPoint x="974" y="367" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="16" edge="1" parent="1" source="9" style="edgeStyle=segmentEdgeStyle;rounded=0;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#2563eb;exitX=1;exitY=0.61;entryX=0;entryY=0.30" target="11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="974" y="394" />
+              <mxPoint x="974" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="17" edge="1" parent="1" source="11" style="edgeStyle=segmentEdgeStyle;rounded=0;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#7e22ce;exitX=0;exitY=0.70;entryX=1;entryY=0.83;dashed=1;dashPattern=6 4" target="9">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="955" y="487" />
+              <mxPoint x="955" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="18" edge="1" parent="1" source="9" style="edgeStyle=segmentEdgeStyle;rounded=0;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#15803d;exitX=0;exitY=0.75;entryX=1;entryY=0.79" target="8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="19" edge="1" parent="1" source="8" style="edgeStyle=segmentEdgeStyle;rounded=0;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#15803d;exitX=0;exitY=0.79;entryX=1;entryY=0.79" target="7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="20" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontColor=#172554;fontSize=13;align=center;fontStyle=1;fontColor=#1d4ed8;" value="1. Solicitud" vertex="1">
+          <mxGeometry height="19" width="110" x="247" y="334" as="geometry" />
+        </mxCell>
+        <mxCell id="21" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontColor=#172554;fontSize=13;align=center;fontStyle=1;fontColor=#1d4ed8;" value="2. Al líder" vertex="1">
+          <mxGeometry height="19" width="108" x="574" y="334" as="geometry" />
+        </mxCell>
+        <mxCell id="22" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontColor=#172554;fontSize=13;align=center;fontStyle=1;fontColor=#1d4ed8;" value="3. Envía la escritura" vertex="1">
+          <mxGeometry height="19" width="155" x="982" y="253" as="geometry" />
+        </mxCell>
+        <mxCell id="23" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontColor=#172554;fontSize=13;align=center;fontStyle=1;fontColor=#7e22ce;" value="4. Devuelve su voto" vertex="1">
+          <mxGeometry height="19" width="155" x="982" y="291" as="geometry" />
+        </mxCell>
+        <mxCell id="24" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontColor=#172554;fontSize=13;align=center;fontStyle=1;fontColor=#1d4ed8;" value="3. Envía la escritura" vertex="1">
+          <mxGeometry height="19" width="155" x="982" y="422" as="geometry" />
+        </mxCell>
+        <mxCell id="25" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontColor=#172554;fontSize=13;align=center;fontStyle=1;fontColor=#7e22ce;" value="4. Devuelve su voto" vertex="1">
+          <mxGeometry height="19" width="155" x="982" y="461" as="geometry" />
+        </mxCell>
+        <mxCell id="26" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontColor=#172554;fontSize=13;align=center;fontStyle=1;fontColor=#15803d;" value="5. Confirma" vertex="1">
+          <mxGeometry height="19" width="140" x="557" y="386" as="geometry" />
+        </mxCell>
+        <mxCell id="27" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontColor=#172554;fontSize=13;align=center;fontStyle=1;fontColor=#15803d;" value="Respuesta al cliente" vertex="1">
+          <mxGeometry height="19" width="129" x="237" y="386" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

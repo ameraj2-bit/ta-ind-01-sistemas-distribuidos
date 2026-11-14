@@ -114,4 +114,20 @@
 
 **Solución:** Se ajustó la ubicación de la tabla en `main.tex` y se volvió a compilar el informe para verificar el orden. Se respaldaron las valoraciones con las fuentes ya citadas y se explicó el alcance de los resultados del emulador.
 
-**Tiempo dedicado:** 1 hora y media.
+**Tiempo dedicado:** 1 hora y 30 minutos.
+
+
+## Sesión 9: 13 de noviembre de 2026
+
+**Actividades realizadas**
+
+- Se incorporó a Arquitectura del sistema el diagrama digital de una escritura en Spanner. Se explicó su evolución desde el boceto del Anexo A y se verificó que el XML editable correspondiera al PNG.
+- Se redactaron dos ejemplos personales. La demora al matricularse en el SGA de la UTEQ se relacionó con la latencia percibida y los errores de envío en WhatsApp con la visibilidad de los fallos y los reintentos.
+- Se completó la introducción con el problema que resuelve Spanner, sus usuarios, su escala y el motivo de elección. Se ajustaron las conclusiones a los resultados del experimento y a la comparación con DynamoDB.
+- Se redactó un resumen.
+
+**Problemas encontrados:** Era necesario explicar los cambios del diagrama respecto del boceto y relacionar los casos del SGA y de WhatsApp con la unidad a partir de lo observado como usuario. También se debía verificar la escala de Spanner y ajustar el resumen a la extensión solicitada.
+
+**Solución:** Se describieron los cambios visibles entre ambos diagramas y se redactaron los ejemplos desde la experiencia personal. Se añadió una fuente de Google Cloud para las cifras de escala, se vincularon las conclusiones con los resultados observados y se comprobó el número de palabras del resumen.
+
+**Tiempo dedicado:** 2 horas.

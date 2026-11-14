@@ -17,3 +17,10 @@
 - **Problemas:** El primer `docker compose up` dijo "empty compose file" porque el archivo había quedado vacío. Además, al matar al líder, `consul1` apareció como `left` y no como `failed`.
 - **Cómo lo resolví:** Creé el compose desde PowerShell y verifiqué con `Get-Content`. Para el `left` revisé la configuración de Autopilot y los logs de consul2, y ahí vi el `RemoveServer` de consul1.
 - **Tiempo dedicado:** 2 horas
+
+
+## 2026-11-13
+- **Qué hice:** Hice el diagrama final de la arquitectura en draw.io y lo subí al repositorio; busqué y verifiqué las referencias (abrí cada DOI, comprobé en SCImago la indexación de las revistas y comparé el BibTeX con la página de cada artículo); y redacté el informe en LaTeX con las secciones de introducción, arquitectura, análisis, experimentación, ejemplos, comparación, postura crítica y conclusiones.
+- **Problema:** El PNG del diagrama se exportó con fondo oscuro y no se leía sobre una página blanca; además, varias referencias no tenían el BibTeX completo, además hubo retrasos en la realización de la actividad por problemas eléctricos.
+- **Cómo lo resolví:** Volví a exportar el diagrama en modo claro y revisé campo por campo cada referencia contra su página antes de pegarla en el archivo .bib.
+- **Tiempo dedicado:** 6 horas

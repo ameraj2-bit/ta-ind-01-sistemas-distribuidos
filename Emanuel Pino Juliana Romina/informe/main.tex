@@ -4,6 +4,8 @@
 \usepackage[T1]{fontenc}
 \usepackage[spanish]{babel}
 \usepackage{graphicx}
+\usepackage{array}
+\usepackage{tabularx}
 \usepackage[backend=biber,style=ieee]{biblatex}
 \usepackage{hyperref}
 
@@ -88,7 +90,36 @@ En la rama E, el primario normalmente responde sin esperar confirmación de sus 
 
 \section{Ejemplos del entorno}
 
-\section{Comparación con Valkey}
+\section{Análisis comparativo: Redis Cluster y Valkey}
+
+Valkey es un almacén de datos en memoria de código abierto y un fork del código abierto de Redis. Surgió en 2024, después de que Redis Ltd. anunciara un cambio de licencia para Redis; la comunidad continuó el desarrollo bajo el nombre Valkey como proyecto de la Linux Foundation. Esta relación histórica explica que ambos proyectos compartan buena parte del diseño de Redis Cluster, aunque no implica que todas sus versiones y características sean idénticas \cite{valkeyHistory}.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.2}
+    \caption{Comparación de las características documentadas de Redis Cluster y Valkey Cluster.}
+    \label{tab:redis-valkey}
+    \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
+        \hline
+        \textbf{Aspecto} & \textbf{Redis Cluster} & \textbf{Valkey Cluster} \\
+        \hline
+        Origen y evolución & Proyecto Redis; Redis Cluster es su modo distribuido. & Fork de la base de código abierto de Redis, iniciado en 2024 como proyecto de la Linux Foundation. \cite{valkeyHistory} \\
+        \hline
+        Arquitectura y particionamiento & Distribuye los datos entre primarios y asigna a cada nodo un subconjunto de 16\,384 ranuras. Usa CRC16 módulo 16\,384 y admite etiquetas de hash. \cite{redisClusterSpec} & También distribuye los datos entre primarios mediante 16\,384 ranuras, CRC16 módulo 16\,384 y etiquetas de hash. \cite{valkeyClusterSpec} \\
+        \hline
+        Comunicación & Los clientes usan RESP y se conectan al nodo responsable de la ranura. Las respuestas \texttt{MOVED} y \texttt{ASK} permiten redirigirlos; los nodos usan un bus binario del clúster. \cite{redisResp,redisClusterSpec} & Usa RESP para los clientes y redirecciones \texttt{MOVED} y \texttt{ASK}. Los nodos se comunican mediante su bus binario del clúster. \cite{valkeyProtocol,valkeyClusterSpec} \\
+        \hline
+        Replicación & Replicación primaria-réplica asíncrona. El primario puede confirmar una escritura antes de que llegue a sus réplicas. \texttt{WAIT} y \texttt{WAITAOF} permiten solicitar confirmaciones, pero no ofrecen consistencia fuerte. \cite{redisReplication,redisClusterSpec,redisClusterScaling,redisWAITAOF} & Replicación primaria-réplica asíncrona. También ofrece \texttt{WAIT} y \texttt{WAITAOF} para esperar confirmaciones sin garantizar consistencia fuerte. \cite{valkeyReplication,valkeyClusterTutorial,valkeyWAITAOF} \\
+        \hline
+        Consistencia y tolerancia a fallos & La elección de una réplica depende de la detección de fallos y del quórum. Una escritura reconocida aún puede perderse durante un fallo o partición. \cite{redisClusterSpec,redisClusterScaling} & Emplea mecanismos equivalentes de detección, quórum y promoción de réplicas. También puede perder escrituras reconocidas; el lado minoritario deja de aceptar escrituras tras el \textit{node timeout}. \cite{valkeyClusterSpec,valkeyClusterTutorial} \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+La tabla muestra que, en las propiedades distribuidas solicitadas, las especificaciones actuales describen modelos muy parecidos. Esa similitud es coherente con el origen de Valkey como fork, pero no demuestra que sus implementaciones tengan el mismo comportamiento en toda versión o configuración. Tampoco permite concluir que uno sea más rápido o confiable: los artículos académicos citados en el análisis CAP y PACELC proporcionan marcos teóricos, no una comparación experimental directa entre Redis Cluster y Valkey \cite{gilbert2002brewer,abadi2012consistency}.
+
+Desde una perspectiva crítica, ambos sistemas documentan el mismo tipo de compromiso: la replicación asíncrona reduce la espera de las escrituras, pero deja abierta la posibilidad de perder cambios reconocidos; y durante ciertas particiones se restringen las escrituras en el lado minoritario. Esto puede ser aceptable para aplicaciones que priorizan acceso de baja latencia y contemplan reintentos o pérdida limitada de datos. Para requisitos de consistencia fuerte o conservación estricta de cada escritura, la documentación por sí sola no basta para justificar la elección. También conviene evaluar el gobierno del proyecto, las licencias, las versiones, los clientes disponibles y las necesidades operativas. La elección entre ambos debe basarse en esos requisitos y en pruebas controladas que todavía no se han realizado.
 
 \section{Postura crítica}
 

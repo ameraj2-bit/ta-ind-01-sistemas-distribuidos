@@ -32,3 +32,17 @@ Registra cada sesión después de realizarla. Usa la fecha real y no completes s
 **Dificultades o soluciones:** Pendiente de completar.
 
 **Tiempo dedicado:** Pendiente de completar.
+
+## Evidencias bibliográficas — 13 de noviembre de 2026
+
+**Actividades realizadas**
+
+- Comprobé las tres capturas PNG de Fruth y Scherzinger (2024), Kokociński y colaboradores (2023) y Sabaghian y colaboradores (2023): corresponden a las fuentes citadas y sus fragmentos relevantes son legibles.
+- Incorporé una subsección de evidencias bibliográficas en los anexos, con las capturas en páginas horizontales, sus citas y explicaciones sobre mantenimiento de Redis Cluster, consistencia ante fallos y replicación.
+- Conservé las cinco capturas del experimento y las referencias existentes. Las capturas académicas no tienen resaltados gráficos; las explicaciones se añadieron como texto del informe.
+- Ajusté los saltos de línea de dos títulos para evitar que sobresalgan del margen y la versión del PDF de salida para admitir el diagrama existente.
+- Compilé con Biber y revisé las citas y la maquetación del PDF: 18 páginas, 21 referencias citadas, sin citas indefinidas ni desbordamientos de cajas. Permanece el aviso de separación silábica española del entorno.
+
+**Dificultad y solución:** MiKTeX muestra avisos de configuración y bloqueo de su base de paquetes. Se utilizó la configuración local existente dentro de mi carpeta para compilar sin cambiar la instalación global.
+
+**Tiempo dedicado:** No registrado.

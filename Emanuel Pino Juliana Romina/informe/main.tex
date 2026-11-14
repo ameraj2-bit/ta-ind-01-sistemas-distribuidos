@@ -1,3 +1,4 @@
+\pdfminorversion=7
 \documentclass[12pt,a4paper]{article}
 
 \usepackage[utf8]{inputenc}
@@ -5,6 +6,7 @@
 \usepackage[spanish]{babel}
 \usepackage{csquotes}
 \usepackage{graphicx}
+\usepackage{lscape}
 \usepackage{array}
 \usepackage{tabularx}
 \usepackage[backend=biber,style=ieee]{biblatex}
@@ -141,7 +143,7 @@ aparecieron como sus réplicas (Figura~\ref{fig:redis-distribucion-nodos}).
     \label{fig:redis-distribucion-nodos}
 \end{figure}
 
-\subsection{Almacenamiento, consulta y asignación de una clave}
+\subsection{Almacenamiento, consulta y asignación\texorpdfstring{\newline}{} de una clave}
 
 Se almacenó el valor \texttt{Juliana} con la clave \texttt{estudiante} desde
 \texttt{redis-1}. Después, se consultó la misma clave desde \texttt{redis-2}
@@ -203,7 +205,7 @@ redis-cli CLUSTER KEYSLOT estudiante
 La opción \texttt{-c} permitió que el cliente siguiera las redirecciones de
 Redis Cluster al consultar desde un nodo distinto al que recibió la escritura.
 
-\section{Análisis comparativo: Redis Cluster y Valkey}
+\section{Análisis comparativo:\texorpdfstring{\newline}{} Redis Cluster y Valkey}
 
 Valkey es un almacén de datos en memoria de código abierto y un fork del código abierto de Redis. Surgió en 2024, después de que Redis Ltd. anunciara un cambio de licencia para Redis; la comunidad continuó el desarrollo bajo el nombre Valkey como proyecto de la Linux Foundation. Esta relación histórica explica que ambos proyectos compartan buena parte del diseño de Redis Cluster, aunque no implica que todas sus versiones y características sean idénticas \cite{valkeyHistory}.
 
@@ -268,6 +270,40 @@ experimentales de rendimiento entre ambos sistemas.
 \section{Declaración de uso de IA}
 
 \section{Anexos}
+\subsection{Evidencias bibliográficas}
+Las siguientes capturas documentan las fuentes académicas consultadas y su relación con el análisis de Redis Cluster.
+
+\clearpage
+\begin{landscape}
+\pdfpageattr{/Rotate 90}
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=\linewidth,height=0.64\textheight,keepaspectratio]{../evidencias/fuentes/01-fruth-2024-redis-live-patching.png}
+    \caption{Ficha editorial y fragmento del resumen de \textit{Live Patching for Distributed In-Memory Key-Value Stores} \cite{fruth2024livepatch}.}
+    \label{fig:fuente-fruth}
+\end{figure}
+La captura identifica a los autores, el año, el DOI y el artículo 241. El fragmento visible explica que las actualizaciones sucesivas de Redis Cluster requieren reiniciar nodos y resincronizar su estado, y presenta la propuesta de aplicar parches en memoria sin reiniciarlos. Esta fuente relaciona el mantenimiento del clúster con la continuidad del servicio; no demuestra que todas las escrituras se conserven ante un fallo.
+
+\clearpage
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=\linewidth,height=0.64\textheight,keepaspectratio]{../evidencias/fuentes/02-kokocinski-2023-consistencia-fallos.png}
+    \caption{Primera página y resumen de \textit{On the correctness of highly available systems in the presence of failures} \cite{kokocinski2023correctness}.}
+    \label{fig:fuente-kokocinski}
+\end{figure}
+Las primeras líneas del resumen describen el análisis de sistemas replicados con consistencia eventual ante fallos de máquinas y particiones de red. Este enfoque ayuda a interpretar las pruebas de Redis Cluster: observar una promoción de réplica no basta para establecer todas sus garantías de consistencia. El artículo aporta un marco general y no una evaluación específica de Redis o Valkey.
+
+\clearpage
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=\linewidth,height=0.64\textheight,keepaspectratio]{../evidencias/fuentes/03-sabaghian-2023-replicacion.png}
+    \caption{Ficha editorial y fragmento del resumen de \textit{Data Replication and Placement Strategies in Distributed Systems: A State of the Art Survey} \cite{sabaghian2023replication}.}
+    \label{fig:fuente-sabaghian}
+\end{figure}
+El fragmento visible relaciona el almacenamiento de copias en distintas ubicaciones con disponibilidad, tolerancia a fallos, balanceo de carga y escalabilidad. Esta revisión permite explicar el propósito de las réplicas en la topología del experimento. La mejora concreta depende de la estrategia empleada; la captura no demuestra que Redis Cluster proporcione consistencia fuerte ni disponibilidad ante cualquier fallo.
+\clearpage
+\end{landscape}
+\pdfpageattr{/Rotate 0}
 
 \begingroup
 \setlength{\emergencystretch}{3em}

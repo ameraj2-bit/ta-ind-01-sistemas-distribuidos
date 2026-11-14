@@ -9,7 +9,7 @@ Este repositorio reúne el trabajo de los cuatro integrantes del grupo. **Cada i
 
 | Integrante | Carpeta | Sistema analizado |
 |---|---|---|
-| Emanuel Pino Juliana Romina | `(completar nombre de la carpeta)/` | (completar) |
+| Emanuel Pino Juliana Romina | `Emanuel Pino Juliana Romina/` | Redis Cluster (comparado con Valkey) |
 | Lombeida Escaleras Bryan Humberto | `Lombeida Escaleras Bryan Humberto/` | Google Spanner (comparado con Amazon DynamoDB) |
 | Mera Jumbo Allison Michelle | `mera-jumbo-allison/` | Apache Kafka (comparado con RabbitMQ)  |
 | Silva Triviño John Jairo | `Silva Triviño John Jairo/` | HDFS (comparado con Ceph) |

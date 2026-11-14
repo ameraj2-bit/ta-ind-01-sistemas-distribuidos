@@ -8,6 +8,8 @@ Yo leí los datos en la página del editor. El requisito pide que el DOI lleve a
 | Saadoon2022 | https://doi.org/10.1016/j.asej.2021.06.024 | 6 autores; Ain Shams Eng. J., vol. 13, art. 101538; 2022 |
 | Ahmed2023 | https://doi.org/10.32620/reks.2023.2.14 | 5 autores; Radioelectronic and Computer Systems, nº 2(106), pp. 171–179; 2023 |
 | Dhulavvagol2023 | https://doi.org/10.1016/j.procs.2023.01.254 | Dhulavvagol y Totad; Procedia CS vol. 218, pp. 2830–2841; 2023. **Yo NO pude abrir la página del editor**: los datos vienen de un catálogo de biblioteca. Si no coincide, quítala. |
+| Li2023 | https://doi.org/10.1007/s10586-022-03764-3 | Zhike Li y Yong Wang; Cluster Computing, vol. 26, nº 2, pp. 1125–1146; 2023 (en línea oct. 2022) |
+| Alange2023 | https://doi.org/10.1007/s10586-023-03992-1 | Neeta Alange y P. Vidya Sagar; Cluster Computing, vol. 26, nº 6, pp. 3381–3388; 2023 |
 | HadoopHDFSDesign | URL del .bib | Abre la versión actual (stable) y cita esa; la que verifiqué es 3.3.0 (2020) |
 | CephArchitecture | URL del .bib | Anota la página donde leíste cada cita |
 | LinkedIn2020 | URL del .bib | Incidente real (ago. 2020, fuera de los 5 años; se usa como evidencia de incidente) |

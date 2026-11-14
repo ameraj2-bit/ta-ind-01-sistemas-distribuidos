@@ -102,4 +102,7 @@ El PDF actualizado y validado tiene 19 páginas. La compilación utilizó config
 
 - **Informe:** realizar la revisión final del contenido y contrastarlo con la rúbrica original.
 - **Evidencias académicas:** añadir los resaltados o anotaciones gráficos exigidos; las tres capturas actuales se acompañan de explicaciones en el informe.
-- **Video de sustentación:** enlace pendiente.
+
+## Video de sustentación: Redis Cluster y comparación con Valkey
+
+[Ver video de sustentación en Google Drive](https://drive.google.com/drive/folders/1U7m1mCY4ImmxXPOMoHQ_06rKP3Zucsgf?usp=sharing)

@@ -1,16 +1,50 @@
-\IfFileExists{IEEEtran.cls}{\documentclass[conference]{IEEEtran}}{\documentclass{article}}
+\documentclass[11pt,a4paper]{article}
 \usepackage{ieee-config}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage{mathptmx}
+\else
+  \usepackage{fontspec}
+  \setmainfont{Nimbus Roman}
+  \setsansfont{Nimbus Sans}
+  \setmonofont{Nimbus Mono PS}
+\fi
+\usepackage[margin=2.54cm]{geometry}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{caption}
 \usepackage{pdflscape}
 \usepackage{xcolor}
+\usepackage{xurl}
 \addbibresource{referencias.bib}
 
-\title{Análisis crítico de sistemas distribuidos: [sistema elegido]}
-\author{Bryan Humberto Lombeida Escaleras}
+\singlespacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\titleformat{\section}{\bfseries\fontsize{16}{19}\selectfont}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\bfseries\fontsize{14}{17}\selectfont}{\thesubsection.}{0.6em}{}
+\titleformat{\subsubsection}{\bfseries\fontsize{12}{14}\selectfont}{\thesubsubsection.}{0.6em}{}
+\titlespacing*{\section}{0pt}{14pt}{6pt}
+\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+\titlespacing*{\subsubsection}{0pt}{10pt}{3pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\captionsetup{font=small,labelfont=bf}
+\addto\captionsspanish{\renewcommand{\tablename}{Tabla}}
 
 \begin{document}
 
 % 1. Carátula
 \begin{titlepage}
+\thispagestyle{empty}
 \centering
 {\Large\bfseries Universidad Técnica Estatal de Quevedo\par}
 \vspace{0.5em}
@@ -41,11 +75,13 @@ Viernes 13 de noviembre de 2026\par
 \mbox{\href{https://github.com/ameraj2-bit/ta-ind-01-sistemas-distribuidos.git}{https://github.com/ameraj2-bit/ta-ind-01-sistemas-distribuidos.git}}\par}
 \vfill
 \end{titlepage}
+\setcounter{page}{1}
 
 % 2. Resumen
-\begin{abstract}
+\section*{Resumen}
 Este informe analiza Google Spanner, una base de datos distribuida que permite realizar transacciones sobre datos repartidos entre varias zonas o regiones. A partir de documentación técnica y estudios publicados, se examinan su arquitectura, la comunicación entre componentes, la tolerancia a fallos y las decisiones de consistencia, disponibilidad y latencia. La comparación con las tablas globales de Amazon DynamoDB en modo de consistencia eventual multirregional permite identificar qué garantías convienen según las necesidades de la aplicación. En el emulador oficial de Spanner se realizaron dos pruebas. La cancelación de una transferencia conservó ambos saldos y la confirmación aplicó el débito y el crédito. Al detener el contenedor, la consulta quedó sin respuesta dentro del límite de quince segundos. Tras reiniciarlo, fue necesario crear de nuevo la instancia y cargar los datos iniciales. El análisis indica que Spanner resulta adecuado cuando los cambios de una transacción deben observarse juntos. DynamoDB en el modo estudiado puede ajustarse mejor cuando se prioriza confirmar escrituras en una región y se aceptan lecturas temporalmente desactualizadas en otras.
-\end{abstract}
+
+\textbf{Palabras clave:} Spanner, DynamoDB, replicación, consistencia, tolerancia a fallos.
 
 % 3. Introducción
 \section{Introducción}
@@ -66,16 +102,15 @@ El servicio encamina la solicitud a la réplica líder. El líder registra el ca
 \subsection{Diagrama original y evolución desde el esquema a mano}
 El boceto del Anexo~A identifica la aplicación, el servicio, la réplica líder y dos réplicas adicionales. En la versión digital, el rango de datos deja de aparecer como un bloque separado y pasa a delimitar el grupo de réplicas que guardan sus copias. El diagrama también ubica las tres zonas dentro de una sola región y numera el recorrido desde la solicitud inicial hasta la respuesta al cliente. Las flechas azules muestran el envío de solicitudes y escrituras, las moradas muestran los votos y las verdes indican la confirmación.
 
-\par\noindent
-\begin{minipage}{\linewidth}
+\begin{figure}[H]
 \centering
 \setlength{\fboxsep}{5pt}
 \colorbox[HTML]{111827}{%
   \includegraphics[width=\dimexpr\linewidth-2\fboxsep\relax]{figuras/Untitled Diagram.drawio.png}%
-}\par\smallskip
-\refstepcounter{figure}\label{fig:evolucion-spanner}
-{\small \textbf{\figurename~\thefigure.} Recorrido de una escritura en Spanner. Diagrama elaborado a partir del boceto del Anexo~A y de la documentación de Google Cloud \cite{GoogleSpannerReplication}.\par}
-\end{minipage}\par
+}
+\caption{Recorrido de una escritura en Spanner. Diagrama elaborado a partir del boceto del Anexo~A y de la documentación de Google Cloud \cite{GoogleSpannerReplication}.}
+\label{fig:evolucion-spanner}
+\end{figure}
 
 % 5. Análisis con conceptos de la Unidad 1
 \section{Análisis con los conceptos}
@@ -137,39 +172,35 @@ En la prueba de transferencia, los saldos iniciales de 100 y 50 se mantuvieron t
 \subsubsection{Interrupción y recuperación del emulador}
 Con el emulador activo, la consulta de referencia devolvió los saldos de 90 y 60. Tras detener el contenedor, el comando de consulta no terminó dentro de los 15 segundos y el programa \texttt{timeout} salió con código 124.
 
-\begin{center}
-\begin{minipage}{\linewidth}\centering
+\begin{figure}[H]
+\centering
 \includegraphics[width=\linewidth,height=0.35\textheight,keepaspectratio]{experimento/ComprobacionInicialAntesExperimento.png}
+\caption{Consulta de referencia con el contenedor activo y los saldos de 90 y 60.}
+\label{fig:experimento-1}
+\end{figure}
 
-\par\small Figura experimental 1. Consulta de referencia con el contenedor activo y los saldos de 90 y 60.
-\end{minipage}
-\end{center}
-
-\begin{center}
-\begin{minipage}{\linewidth}\centering
+\begin{figure}[H]
+\centering
 \includegraphics[width=\linewidth,height=0.35\textheight,keepaspectratio]{experimento/DetencionEmulador-ProbarConsulta.png}
+\caption{Contenedor detenido y consulta interrumpida al alcanzar el límite de 15 segundos.}
+\label{fig:experimento-2}
+\end{figure}
 
-\par\small Figura experimental 2. Contenedor detenido y consulta interrumpida al alcanzar el límite de 15 segundos.
-\end{minipage}
-\end{center}
+Tras el reinicio, Docker mostró el contenedor activo y el servicio respondió con \texttt{Instance} \texttt{not found}. La consulta volvió a funcionar después de ejecutar \texttt{preparar}, que creó la instancia y cargó los saldos de 100 y 50.
 
-Tras el reinicio, Docker mostró el contenedor activo y el servicio respondió con \texttt{Instance not found}. La consulta volvió a funcionar después de ejecutar \texttt{preparar}, que creó la instancia y cargó los saldos de 100 y 50.
-
-\begin{center}
-\begin{minipage}{\linewidth}\centering
+\begin{figure}[H]
+\centering
 \includegraphics[width=\linewidth,height=0.35\textheight,keepaspectratio]{experimento/ReinicioRecuperacion-Parte1.png}
+\caption{Contenedor reiniciado y respuesta gRPC \texttt{NOT\_FOUND} para la instancia anterior.}
+\label{fig:experimento-3}
+\end{figure}
 
-\par\small Figura experimental 3. Contenedor reiniciado y respuesta gRPC \texttt{NOT\_FOUND} para la instancia anterior.
-\end{minipage}
-\end{center}
-
-\begin{center}
-\begin{minipage}{\linewidth}\centering
+\begin{figure}[H]
+\centering
 \includegraphics[width=\linewidth,height=0.35\textheight,keepaspectratio]{experimento/ComprobacionFalloYRecuperacionEmulador.png}
-
-\par\small Figura experimental 4. Creación de una instancia nueva y consulta de los saldos iniciales de 100 y 50.
-\end{minipage}
-\end{center}
+\caption{Creación de una instancia nueva y consulta de los saldos iniciales de 100 y 50.}
+\label{fig:experimento-4}
+\end{figure}
 
 \subsection{Interpretación}
 La misma consulta permitió distinguir dos estados desde el cliente: al detener el contenedor, no hubo respuesta antes del límite fijado. Tras el reinicio, el servicio respondió, pero indicó que la instancia anterior ya no existía. El fallo fue visible para la aplicación y el acceso a los datos requirió recrear la instancia y cargar los registros iniciales. Ese comportamiento concuerda con el almacenamiento en memoria del emulador \cite{GoogleSpannerEmulator}.
@@ -188,17 +219,15 @@ El experimento ilustra la comunicación cliente--servidor y el efecto observable
 \section{Análisis comparativo}
 La comparación se centra en Spanner con una configuración multirregional y en las tablas globales de DynamoDB con consistencia eventual multirregional (MREC). Se toma MREC como caso principal porque AWS lo aplica por defecto al crear una tabla global sin indicar un modo. También se considera la opción de consistencia fuerte multirregional (MRSC) al discutir las decisiones de diseño \cite{GoogleSpannerReplication,AWSGlobalTables}.
 
-\par\noindent
-\begin{minipage}{\linewidth}
 \subsection{Tabla de comparación}
+\begin{table}[H]
 \centering
-\refstepcounter{table}
+\caption{Spanner multirregional y DynamoDB Global Tables en modo MREC}
 \label{tab:spanner-dynamodb}
-\small \textbf{\tablename~\thetable.} Spanner multirregional y DynamoDB Global Tables en modo MREC\par\smallskip
 \small
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.23}
-\begin{tabular}{@{}p{0.18\linewidth}p{0.37\linewidth}p{0.37\linewidth}@{}}
+\begin{tabularx}{\linewidth}{@{}p{0.19\linewidth}XX@{}}
 \toprule
 \raggedright\textbf{Criterio} & \raggedright\textbf{Google Spanner} & \raggedright\textbf{DynamoDB (MREC)} \tabularnewline
 \midrule
@@ -224,8 +253,8 @@ La comparación se centra en Spanner con una configuración multirregional y en 
 \raggedright Las escrituras pueden continuar si hay quórum. Una réplica atrasada puede solicitar a otra los cambios pendientes \cite{GoogleSpannerReplication}. &
 \raggedright La aplicación puede redirigir el tráfico hacia otra réplica. Cuando se recupera una réplica aislada, se propagan los cambios pendientes \cite{AWSGlobalTables}. \tabularnewline
 \bottomrule
-\end{tabular}
-\end{minipage}\par
+\end{tabularx}
+\end{table}
 
 \subsection{Discusión de resultados}
 Los ejemplos de la sección~\ref{sec:ejemplos-entorno} sirven para plantear dos preguntas separadas al comparar los sistemas: cuánto espera el usuario y si la operación logra completarse. La tabla~\ref{tab:spanner-dynamodb} aplica esa distinción al tiempo necesario para confirmar una escritura y a la posibilidad de hacerlo cuando se interrumpe la comunicación entre réplicas \cite{GoogleSpannerReplication,AWSGlobalTables}.
@@ -262,37 +291,40 @@ La prueba de interrupción mostró que el estado del contenedor y la disponibili
 La comparación indica que Spanner es una opción adecuada si una consulta consistente debe poder observar juntos los cambios de una transacción y la aplicación puede asumir el tiempo que toma reunir el quórum de escritura. Para operaciones independientes que deben confirmarse en una región sin esperar la propagación y que admiten lecturas temporalmente desactualizadas en otras regiones, DynamoDB con consistencia eventual multirregional puede ajustarse mejor \cite{GoogleSpannerTransactions,GoogleSpannerReplication,AWSGlobalTables}.
 
 % 11. Declaración de uso de inteligencia artificial
-\section{Declaración de uso de inteligencia artificial}
-Se utilizó OpenAI Codex, con el modelo GPT-6.1-Sol en la revisión final, como apoyo para organizar el informe, mejorar la redacción, preparar el programa del experimento y elaborar la versión digital del diagrama. Las afirmaciones técnicas se cotejaron con las fuentes citadas y los resultados del experimento se comprobaron con las salidas de la terminal y las capturas originales. Los ejemplos del SGA y de WhatsApp proceden de observaciones personales del estudiante.
+\section*{Declaración de uso de inteligencia artificial}
+Se utilizó OpenAI Codex como herramienta de apoyo, con el modelo GPT-6-Sol en la revisión final. Se empleó para organizar y revisar la redacción del informe, preparar el programa del experimento,como tambien guiar y explicar en el diagrama del boceto a mano.
+
+Las afirmaciones técnicas donde se realizo una segunda revision con IA a base de la documentación oficial y los artículos citados. Los resultados del experimento se verificaron con las salidas de la terminal y las capturas originales. También se comprobó que el PDF compilara con las figuras y las citas.
 
 % 12. Referencias: mínimo seis fuentes IEEE; verificar metadatos y DOI.
 \printbibliography[title={Referencias}]
 
 % 13. Anexos
+\clearpage
 \appendix
-\section{Anexo A: fotografía del esquema a mano}
+\section*{Anexo A. Fotografía del esquema a mano}
 \begin{center}
 \includegraphics[width=\textwidth,height=0.68\textheight,keepaspectratio]{figuras/Anexo-A.jpeg}
 \end{center}
 
 Bosquejo inicial de una escritura en Google Spanner, elaborado a mano el 13 de noviembre de 2026.
 
-\section{Anexo B: capturas de lectura de las fuentes}
 \begin{landscape}
+\section*{Anexo B. Capturas de lectura de las fuentes}
 \begin{center}
-\includegraphics[width=\linewidth,height=0.90\textheight,keepaspectratio]{capturas/FastCommitmentGeo-Distributed.png}
+\includegraphics[width=\linewidth,height=0.75\textheight,keepaspectratio]{capturas/FastCommitmentGeo-Distributed.png}
 \end{center}
 Lectura anotada de Zhang y colaboradores, página 2555. El fragmento marcado describe la coordinación de Spanner mediante 2PC sobre Multi-Paxos y la comunicación entre regiones \cite{ZhangEtAl2024D2PC}.
 
 \clearpage
 \begin{center}
-\includegraphics[width=\linewidth,height=0.90\textheight,keepaspectratio]{capturas/HoliPaxos.png}
+\includegraphics[width=\linewidth,height=0.75\textheight,keepaspectratio]{capturas/HoliPaxos.png}
 \end{center}
 Lectura anotada de Liang y colaboradores, página 2505. El fragmento marcado trata la detección de fallos en HoliPaxos; se usa como apoyo conceptual, sin atribuir ese mecanismo a Spanner \cite{LiangEtAl2025HoliPaxos}.
 
 \clearpage
 \begin{center}
-\includegraphics[width=\linewidth,height=0.90\textheight,keepaspectratio]{capturas/EfficientCausalAccess.png}
+\includegraphics[width=\linewidth,height=0.75\textheight,keepaspectratio]{capturas/EfficientCausalAccess.png}
 \end{center}
 Lectura anotada de Lima y colaboradores, página 1 del PDF. El fragmento marcado presenta el equilibrio entre latencia y costo al decidir dónde y cuándo leer, y enumera los servicios usados para evaluar las estrategias, entre ellos DynamoDB \cite{LimaEtAl2023CausalAccess}.
 \end{landscape}

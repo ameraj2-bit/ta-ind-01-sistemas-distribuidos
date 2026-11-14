@@ -131,3 +131,18 @@
 **Solución:** Se describieron los cambios visibles entre ambos diagramas y se redactaron los ejemplos desde la experiencia personal. Se añadió una fuente de Google Cloud para las cifras de escala, se vincularon las conclusiones con los resultados observados y se comprobó el número de palabras del resumen.
 
 **Tiempo dedicado:** 2 horas.
+
+## Sesión 10: 13 de noviembre de 2026
+
+**Actividades realizadas**
+
+- Se completó el README individual con el archivo principal, el compilador, las dependencias y el orden de compilación. Se enlazó la documentación del experimento y se dejó un espacio para el video de sustentación.
+- Se revisó la declaración de uso de inteligencia artificial para indicar la herramienta, el modelo, las tareas en las que se utilizó y cómo se verificaron las afirmaciones y los resultados.
+- Se recompiló el informe y se comprobó la presencia de la declaración en el PDF.
+- Se hizo una reestructuracion del main.tex para tener un formato mas de acorde al formato IEEE.
+
+**Problemas encontrados:** La carpeta necesitaba instrucciones de compilación y el enlace del video aún estaba pendiente. La declaración de IA requería precisar cómo se verificó el trabajo.
+
+**Solución:** Se documentó la secuencia de pdfLaTeX y Biber, se dejó identificado el espacio para el video y se indicaron las fuentes, las salidas de terminal y las capturas utilizadas para verificar el informe.
+
+**Tiempo dedicado:** 1 hora.

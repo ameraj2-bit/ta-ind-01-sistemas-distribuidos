@@ -26,3 +26,21 @@
 - **Uso de herramientas:** Claude me ayudó a interpretar las salidas de los comandos y a armar la estructura de `resultados.md`. La interpretación final la escribo yo.
 - **Tiempo dedicado:** 40 min
 - **Siguiente paso:** Subir los archivos al repositorio, escribir mi interpretación y buscar las fuentes.
+
+## 2026-11-13 (tarde y noche)
+
+- **Qué hice:** Busqué y verifiqué las referencias del informe: abrí cada DOI y comparé autores, año, título, revista, volumen y páginas con el `.bib`. Hice las capturas de lectura anotadas de los artículos de Peters (p. 2), Saadoon (p. 3) y Ahmed (p. 172). Subí al repositorio las capturas, las referencias y el borrador del informe en LaTeX, completé `resultados.md` con mi interpretación del experimento y compilé el PDF en Overleaf. Después completé las secciones que faltaban: transparencias de distribución, escala del sistema y clasificación PACELC.
+- **Problema encontrado:** Subí por error `resultados.md` a la carpeta `informe/` en lugar de a `experimento/`. Además, el `main.tex` del repositorio quedó con una versión anterior a la del `informe.pdf`, por lo que el PDF no habría podido regenerarse al clonar. También vi que la fuente de Dhulavvagol aparecía como 2023 en la página del editor y como 2022 en otra base de datos.
+- **Cómo lo resolví:** Moví `resultados.md` a su carpeta y borré el duplicado. Subí el `main.tex` actualizado y comprobé que coincidía con el PDF. Para Dhulavvagol usé 2023, que es el dato del editor y del DOI.
+- **Uso de herramientas:** Usé Claude (Anthropic) para buscar fuentes candidatas, redactar un borrador del informe en LaTeX y dibujar en TikZ el diagrama de la arquitectura a partir de mi boceto, y para revisar mi interpretación y señalarme afirmaciones sin respaldo. Verifiqué yo las referencias en las páginas de los editores y las capturas de lectura son de los PDF que leí.
+- **Tiempo dedicado:** 2 h 40 min
+- **Siguiente paso:** Grabar y subir el video de sustentación y revisar el informe completo.
+
+## 2026-11-14
+
+- **Qué hice:** Preparé el guion del video, lo ensayé y grabé el video de sustentación con mi rostro y mi voz. Lo subí a YouTube como no listado y agregué el enlace al `README.md`.
+- **Problema encontrado:** No alcancé a ejecutar `hdfs getconf` para comprobar los valores de heartbeat de mi clúster.
+- **Cómo lo resolví:** Dejé esa limitación escrita en el informe y en el video: no puedo explicar con certeza por qué la detección tardó 14 min 02 s.
+- **Uso de herramientas:** Usé Claude para ordenar el guion del video y las indicaciones de pantalla. El video lo grabé yo.
+- **Tiempo dedicado:** 1 h 05 min
+- **Siguiente paso:** Revisar el informe completo y practicar la explicación oral del experimento.

@@ -25,6 +25,8 @@
 
 \section{Resumen}
 
+Este trabajo analiza la arquitectura, la consistencia y la tolerancia a fallos de Redis Cluster y las compara documentalmente con Valkey. Se estudian el particionamiento por ranuras de hash, la replicación asíncrona y los compromisos descritos por CAP y PACELC. El experimento se realizó únicamente con Redis 7.4, mediante seis nodos en Docker: tres primarios y tres réplicas. Las salidas registradas mostraron los 16\,384 slots asignados y disponibles; la clave \texttt{estudiante} se ubicó en el slot 13012 y pudo consultarse desde otro nodo mediante un cliente compatible con el clúster. En dos pruebas separadas se observó la promoción de una réplica y, en la primera, la reincorporación del nodo recuperado como réplica. Estos resultados ilustran la distribución de datos y la recuperación en la topología utilizada, sin demostrar disponibilidad ante cualquier partición ni conservación de todas las escrituras confirmadas. Se concluye que la elección entre Redis Cluster y Valkey debe considerar sus garantías documentadas y los requisitos de la aplicación; no se realizaron experimentos con Valkey.
+
 \section{Introducción}
 
 Redis es un almacén de datos en memoria que permite trabajar con estructuras como cadenas y hashes mediante comandos enviados a un servidor. La documentación oficial presenta usos que incluyen base de datos, caché, motor de flujos y agente de mensajería; por ello, Redis puede atender necesidades distintas de almacenamiento y acceso a datos, según la forma en que se configure y utilice \cite{redisDataStore,redisQuickStarts}.
@@ -70,6 +72,14 @@ La Figura~\ref{fig:arquitectura-redis} resume la topología descrita: los nodos 
 
 \section{Transparencias}
 
+La transparencia de acceso es parcial: los comandos \texttt{SET} y \texttt{GET} conservan su interfaz, pero se necesita un cliente compatible con Redis Cluster para resolver las redirecciones. En la prueba, \texttt{redis-cli -c} permitió consultar la clave desde otro nodo sin cambiar su nombre ni indicar manualmente el destino de cada solicitud \cite{redisClusterScaling}.
+
+La transparencia de ubicación y de fragmentación también depende del cliente. La aplicación puede trabajar con nombres de claves mientras el cliente sigue redirecciones o mantiene un mapa de ranuras. El slot 13012 de \texttt{estudiante} permite identificar el fragmento responsable. Esta abstracción tiene límites: las operaciones con varias claves requieren que pertenezcan a la misma ranura; las etiquetas de hash ayudan a organizar esos casos \cite{redisClusterSpec}.
+
+La transparencia de replicación oculta parte de la propagación de cambios cuando se opera sobre el primario. Sin embargo, una réplica puede estar retrasada, por lo que leer de ella exige considerar la consistencia requerida. Mantener copias no equivale a confirmar cada escritura en todas ellas \cite{redisReplication}.
+
+La transparencia de fallos es limitada. Las promociones observadas permitieron continuar consultando datos, pero durante la detección y recuperación pueden aparecer errores o desconexiones. El cliente debe gestionar reconexiones y decidir cuándo reintentar según la operación. Las pruebas no midieron ese intervalo ni demostraron ausencia de pérdida de escrituras \cite{redisClusterScaling}.
+
 \section{CAP y PACELC}
 
 \subsection{Análisis de Redis Cluster según CAP}
@@ -91,6 +101,14 @@ En la rama P, Redis Cluster favorece la continuidad de las operaciones en el lad
 En la rama E, el primario normalmente responde sin esperar confirmación de sus réplicas. Esta decisión reduce la espera de las escrituras, pero deja un intervalo en el que una falla puede causar pérdida de datos y permite que las réplicas tengan retraso respecto del primario. El comando \texttt{WAIT} permite esperar confirmaciones de réplicas y reducir la probabilidad de pérdida, aunque la documentación aclara que no convierte a Redis Cluster en un sistema de consistencia fuerte \cite{redisClusterSpec,redisClusterScaling}.
 
 \section{Modelos de comunicación}
+
+La comunicación cliente-servidor sigue un modelo de solicitud y respuesta: el cliente envía comandos codificados con RESP y recibe resultados o errores por la conexión TCP. En el experimento, las invocaciones de \texttt{redis-cli} se ejecutaron dentro de los contenedores; no fue necesario publicar sus puertos en el equipo anfitrión \cite{redisResp}.
+
+El cliente contacta directamente con el nodo responsable de una clave. Una respuesta \texttt{MOVED} indica otro destino para su ranura y permite actualizar el mapa del clúster. Durante una migración, \texttt{ASK} solicita redirigir esa operación de forma temporal, precedida de \texttt{ASKING}, sin sustituir permanentemente el mapa. La opción \texttt{-c} utilizada sigue las redirecciones; las capturas no documentan una migración ni una respuesta \texttt{ASK} \cite{redisClusterSpec}.
+
+Entre nodos se utiliza el Cluster Bus, una malla de conexiones TCP con protocolo binario. Los mensajes de latido, la información difundida mediante gossip y los votos coordinan la detección de fallos y la promoción de réplicas. En Compose se anuncia el puerto 16379 para el bus y el 6379 para el servicio de cliente \cite{redisClusterSpec}.
+
+La replicación transporta un flujo asíncrono de cambios desde cada primario hacia sus réplicas y dispone de resincronización tras interrupciones \cite{redisReplication}. En las pruebas, los cambios de rol observados reflejan la coordinación del clúster, mientras que la lectura posterior acredita únicamente la disponibilidad del dato consultado.
 
 \section{Tolerancia a fallos}
 
@@ -240,7 +258,7 @@ Desde una perspectiva crítica, ambos sistemas documentan el mismo tipo de compr
 
 Redis Cluster ofrece un compromiso práctico entre rendimiento, escalabilidad horizontal y recuperación ante fallos, pero esas propiedades no deben confundirse con una garantía de consistencia linealizable o de disponibilidad ante cualquier partición. Su comportamiento depende de la topología, de que existan réplicas elegibles, de la mayoría de primarios accesible y de parámetros como \texttt{cluster-node-timeout} y \texttt{cluster-require-full-coverage} \cite{redisClusterSpec,redisClusterScaling}.
 
-Desde una perspectiva de ingeniería, este diseño puede ser adecuado cuando la aplicación tolera una ventana acotada de indisponibilidad de escritura en nodos aislados y puede aceptar el riesgo documentado de perder algunas escrituras confirmadas. En cambio, si cada escritura reconocida debe conservarse y observarse de manera estrictamente consistente, es necesario evaluar mecanismos adicionales y considerar un sistema con garantías distintas. Esta valoración se basa en las propiedades documentadas de Redis Cluster; no representa resultados de los experimentos que se desarrollarán más adelante.
+Desde una perspectiva de ingeniería, este diseño puede ser adecuado cuando la aplicación tolera una ventana acotada de indisponibilidad de escritura en nodos aislados y puede aceptar el riesgo documentado de perder algunas escrituras confirmadas. En cambio, si cada escritura reconocida debe conservarse y observarse de manera estrictamente consistente, es necesario evaluar mecanismos adicionales y considerar un sistema con garantías distintas. Esta valoración se basa en las propiedades documentadas de Redis Cluster y se distingue de las observaciones del experimento ya realizado, cuyo alcance se limita a los dos escenarios de fallo descritos.
 
 \section{Conclusiones}
 
@@ -268,6 +286,12 @@ equivalentes con Valkey y, por tanto, no se presentan conclusiones
 experimentales de rendimiento entre ambos sistemas.
 
 \section{Declaración de uso de IA}
+
+Se utilizó ChatGPT/Codex como apoyo para organizar la investigación, localizar fuentes académicas y documentación oficial, contrastar metadatos y DOI, y preparar entradas bibliográficas. También se empleó para proponer y redactar párrafos del informe, revisar su coherencia, editar LaTeX, integrar las evidencias existentes, compilar con Biber e identificar problemas de presentación. La asistencia incluyó la documentación del experimento, la preparación de comandos técnicos y la revisión de los README y de la bitácora. Su intervención fue más amplia que una corrección ortográfica.
+
+La ejecución del experimento con Docker, la obtención de las capturas y la consulta de los resultados registrados corresponden al trabajo de la estudiante. La IA ayudó a interpretar esas evidencias y a expresarlas en el informe; las capturas originales no fueron generadas por IA. La comparación con Valkey se apoyó en fuentes documentales y no en pruebas experimentales de ese sistema.
+
+Las propuestas de IA pueden contener errores, por lo que la responsabilidad de seleccionar, revisar y explicar el contenido entregado corresponde a la estudiante. Las verificaciones asistidas se documentan con sus fuentes y limitaciones, y no sustituyen la comprensión de los artículos ni la sustentación personal de los resultados.
 
 \section{Anexos}
 \subsection{Evidencias bibliográficas}

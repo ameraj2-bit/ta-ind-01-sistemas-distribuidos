@@ -1,0 +1,39 @@
+# TA-IND-01 · Análisis crítico de Google Spanner
+
+Informe académico individual de **Bryan Humberto Lombeida Escaleras** para la asignatura Aplicaciones Distribuidas. El trabajo analiza la arquitectura y el comportamiento de Google Spanner, lo compara con Amazon DynamoDB y documenta una prueba con el emulador local de Spanner.
+
+## Video de sustentación
+
+**Enlace pendiente de publicación.** Sustituir esta línea por el enlace al video de 3 a 5 minutos en YouTube (no listado) o Google Drive (con acceso abierto).
+
+## Compilación del informe
+
+- **Archivo principal:** [main.tex](main.tex).
+- **Compilador:** pdfLaTeX o XeLaTeX. Biber procesa las citas y genera la bibliografía.
+- **Formato:** A4, una columna, tipografía de estilo Times de 11 pt y márgenes de 2,54 cm. Las citas y la bibliografía usan el estilo IEEE.
+- **Dependencias:** una distribución de LaTeX con la clase `article`, pdfLaTeX y Biber. El informe usa `biblatex`, `biblatex-ieee`, `inputenc`, `fontenc`, `babel` con español e inglés, `csquotes`, `graphicx`, `booktabs`, `hyperref`, `mathptmx`, `geometry`, `microtype`, `setspace`, `titlesec`, `fancyhdr`, `float`, `tabularx`, `array`, `caption`, `pdflscape`, `xcolor` y `xurl`. También se requiere `iftex`. Con pdfLaTeX se usan `mathptmx` y las métricas y fuentes Times de PSNFSS. Con XeLaTeX se usan `fontspec` y las fuentes Nimbus Roman, Nimbus Sans y Nimbus Mono PS (URW Base35), además de las fuentes base de la distribución (Latin Modern y Zapf Dingbats).
+- **Archivos del proyecto:** conserve `ieee-config.sty`, `referencias.bib` y las carpetas de imágenes en su ubicación dentro del repositorio para que LaTeX encuentre los recursos.
+
+Abra una terminal en esta carpeta y ejecute los comandos en el orden indicado:
+
+```bash
+pdflatex main.tex
+biber main
+pdflatex main.tex
+pdflatex main.tex
+```
+
+Si la instalación de pdfLaTeX no dispone de las fuentes Times, use XeLaTeX con sus dependencias instaladas:
+
+```bash
+xelatex main.tex
+biber main
+xelatex main.tex
+xelatex main.tex
+```
+
+El resultado es `main.pdf`. Las dos últimas pasadas actualizan las referencias cruzadas y los números de las citas.
+
+## Experimento
+
+El [README del experimento](experimento/README-Experimento.md) incluye los requisitos, los comandos para reproducir la prueba, los resultados observados y los enlaces a las capturas originales.

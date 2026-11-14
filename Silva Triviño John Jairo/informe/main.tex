@@ -58,7 +58,7 @@ Este informe analiza el Hadoop Distributed File System (HDFS) como sistema distr
 \newpage
 % ------------------------------------------------------------------ 1. INTRODUCCION
 \section{Introducción}
-Un sistema distribuido reparte datos y trabajo entre varias máquinas que se coordinan mediante mensajes, y debe seguir funcionando aunque alguna falle. Elegí HDFS porque es un caso claro de ese problema: guarda archivos muy grandes dividiéndolos en bloques que se copian en distintas máquinas. Como segundo sistema para comparar elegí Ceph, que resuelve el mismo problema de otra forma: en lugar de un servidor que recuerda dónde está cada dato, calcula la ubicación \cite{CephArchitecture}.
+Un sistema distribuido reparte datos y trabajo entre varias máquinas que se coordinan mediante mensajes, y debe seguir funcionando aunque alguna falle. HDFS resuelve el problema de almacenar archivos muy grandes en máquinas comunes: los divide en bloques y los copia en distintas máquinas. Es un marco ampliamente usado para el procesamiento de grandes volúmenes de datos \cite{Dhulavvagol2023}. A escala real, LinkedIn reporta 1 exabyte de datos en el conjunto de sus clústeres Hadoop, con un clúster de 10\,000 nodos que almacena 500 PB y un solo NameNode que mantiene unos 1000 millones de objetos entre directorios, archivos y bloques \cite{LinkedIn2021}. Elegí HDFS porque es un caso claro de ese problema y porque puedo reproducirlo a pequeña escala en mi computador. Como segundo sistema para comparar elegí Ceph, que resuelve el mismo problema de otra forma: en lugar de un servidor que recuerda dónde está cada dato, calcula la ubicación \cite{CephArchitecture}.
 
 El objetivo es entender y evaluar de forma crítica cómo HDFS responde a las propiedades de la Unidad 1: transparencia, consistencia y disponibilidad, comunicación y tolerancia a fallos. El trabajo combina tres fuentes de evidencia: documentación y artículos citados, un experimento propio de caída de un DataNode y situaciones reales de mi entorno. El informe sigue este orden: arquitectura (sección~\ref{sec:arq}), análisis (sección~\ref{sec:analisis}), experimento (sección~\ref{sec:exp}), ejemplos del entorno (sección~\ref{sec:ejemplos}), comparación con Ceph (sección~\ref{sec:comp}), postura crítica y conclusiones.
 
@@ -123,17 +123,28 @@ Mi primer esquema (Anexo~A, fechado 12/11/2026) mostraba un NameNode, tres DataN
 \section{Análisis desde los conceptos de la Unidad 1}\label{sec:analisis}
 
 \subsection{Transparencias de distribución}
-\begin{itemize}
-  \item \textbf{Ubicación:} el cliente pide \texttt{/datos.bin} por su ruta y no indica en qué DataNode está cada bloque; esa información la resuelve el NameNode. Lo comprobé al leer el archivo completo sin conocer la ubicación de los bloques.
-  \item \textbf{Replicación:} el usuario ve un solo archivo; HDFS mantiene tres copias de cada bloque (factor 3 en mi configuración).
-  \item \textbf{Fallos:} con \texttt{datanode4} apagado la lectura completa funcionó con el mismo comando y la misma ruta (sección~\ref{sec:exp}). Esta transparencia es parcial: el cliente no vio el fallo, pero el administrador sí ve nodos muertos en los informes.
-  \item \textbf{Concurrencia:} es limitada por diseño. HDFS admite un solo escritor por archivo \cite{HadoopHDFSDesign}, de modo que dos clientes no pueden escribir a la vez el mismo archivo.
-\end{itemize}
+\begin{table}[H]
+\centering\footnotesize
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{2.3cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Transparencia & ¿La ofrece? & Por qué, con base en mi experimento y las fuentes \\
+\midrule
+Acceso & Sí & Leí \texttt{/datos.bin} con el mismo comando (\texttt{hdfs dfs}) sin importar en qué nodo estaba cada bloque. \\
+Ubicación & Sí & Uso la ruta del archivo; el NameNode resuelve en qué DataNodes está cada bloque \cite{HadoopHDFSDesign}. \\
+Migración & No la probé & No moví datos de un nodo a otro por decisión mía. Lo más cercano que observé fue la re-replicación tras la falla, que no es una migración pedida. \\
+Reubicación & No la probé & No moví un nodo ni un bloque mientras el archivo estaba en uso. \\
+Replicación & Sí & Veo un solo archivo; HDFS mantiene 3 copias de cada bloque (factor 3 en mi montaje). \\
+Concurrencia & Limitada & HDFS admite un solo escritor por archivo \cite{HadoopHDFSDesign}, así que dos clientes no pueden escribir a la vez el mismo archivo. \\
+Fallos & Parcial & Con \texttt{datanode4} apagado la lectura completa funcionó con el mismo comando y la misma ruta, pero el administrador sí ve nodos muertos en los informes y la detección tardó 14 min 02 s. \\
+\bottomrule
+\end{tabularx}
+\caption{Transparencias de distribución en HDFS según mi montaje.}
+\end{table}
 
 \subsection{CAP y PACELC}
 El teorema CAP establece un compromiso entre consistencia, disponibilidad y tolerancia a particiones: un sistema solo puede conservar dos de las tres. PACELC lo extiende: si hay partición (P), se elige entre disponibilidad (A) y consistencia (C); si no la hay (E), se elige entre latencia (L) y consistencia (C) \cite{Ahmed2023}. El artículo agrupa los sistemas en PC/EC, PC/EL, PA/EC y PA/EL, y en su lista de la página 172 figuran HBase y BigTable como PC/EC; HDFS no aparece clasificado.
 
-\textbf{Mi clasificación de HDFS (razonamiento propio, no una clasificación publicada):} lo ubico del lado de la consistencia. El NameNode es el árbitro único de los metadatos y el archivo tiene un solo escritor \cite{HadoopHDFSDesign}; en mi montaje, que no tiene NameNode de respaldo, una falla del NameNode dejaría sin servicio al espacio de nombres antes que permitir vistas distintas del sistema de archivos. No probé esa caída. Mi experimento fue una falla de un DataNode, no una partición de red, así que no sirve como evidencia de PACELC: solo muestra que los datos siguieron disponibles gracias a la replicación.
+\textbf{Mi clasificación de HDFS (razonamiento propio, no una clasificación publicada):} lo clasifico como PC/EC, es decir, del lado de la consistencia tanto ante una partición como sin ella. El NameNode es el árbitro único de los metadatos y el archivo tiene un solo escritor \cite{HadoopHDFSDesign}; en mi montaje, que no tiene NameNode de respaldo, una falla del NameNode dejaría sin servicio al espacio de nombres antes que permitir vistas distintas del sistema de archivos (prioriza consistencia frente a disponibilidad). Sin partición, toda consulta de ubicación pasa por ese árbitro único y hay un solo escritor por archivo, lo que prefiere consistencia frente a latencia. No probé esa caída. Mi experimento fue una falla de un DataNode, no una partición de red, así que no sirve como evidencia de PACELC: solo muestra que los datos siguieron disponibles gracias a la replicación.
 
 Para Ceph, el artículo de Peters y van der Ster señala que CephFS busca ofrecer garantías de consistencia equivalentes a las de un sistema de archivos local \cite{Peters2021}, y la documentación indica que los monitores usan el algoritmo Paxos y una mayoría para acordar el mapa del clúster \cite{CephArchitecture}. Esto es coherente con una orientación a consistencia, pero tampoco es una clasificación publicada.
 
@@ -146,12 +157,23 @@ HDFS combina tres formas de comunicación:
 \end{itemize}
 En la escritura, los DataNodes que guardan las réplicas se encadenan en una tubería \cite{HadoopHDFSDesign}, como dibujé en mi boceto.
 
+\textbf{Clasificación.} Es un modelo cliente--servidor en su variante maestro y trabajadores, no un modelo entre pares: el cliente siempre empieza preguntando al NameNode. Solo la tubería de escritura tiene una parte entre pares (DataNode a DataNode), por lo que lo considero híbrido. Las consultas al NameNode son síncronas por llamada remota; los latidos son asíncronos; la transferencia de bloques es un flujo directo de datos. En mi montaje no observé ningún bróker de mensajería con colas.
+
 \subsection{Tolerancia a fallos}
 Los mecanismos son tres: replicación de bloques, detección por latidos y re-replicación. Ante la ausencia de latidos, el NameNode lleva la cuenta de qué bloques necesitan replicarse e inicia la replicación cuando hace falta \cite{HadoopHDFSDesign}. Una revisión sobre tolerancia a fallos en sistemas de almacenamiento masivo describe el enfoque de latidos, usado en HDFS, YARN y Storm, y explica que un componente se declara fallido si no recibe el latido dentro de un tiempo especificado \cite{Saadoon2022}.
 
+\textbf{Qué fallos soporta y cuáles no.}
+\begin{itemize}
+  \item \emph{Probado:} la caída de un DataNode, con replicación 3 en un clúster de 4 nodos.
+  \item \emph{Por la definición de la replicación (no probado):} con 3 copias por bloque, un bloque sigue existiendo mientras sobreviva al menos una de ellas.
+  \item \emph{No soportado en mi montaje:} la caída del NameNode, porque tengo uno solo y sin respaldo. No la probé. Esto también significa que mi montaje no usa consenso entre varios coordinadores.
+  \item \emph{Reintentos:} no los probé; mis lecturas funcionaron en el primer intento.
+  \item \emph{Fallos que afectan a muchos nodos a la vez:} el incidente que sigue muestra que la replicación no basta.
+\end{itemize}
+
 \textbf{Incidente real documentado.} En 2020 LinkedIn publicó el análisis de un incidente en su clúster Hadoop: por fallas de procedimiento en la gestión del ciclo de vida de los equipos, aproximadamente el 2\,\% de las máquinas de unos pocos racks fue reinstalado por error \cite{LinkedIn2020}. La pérdida fue pequeña en bloques (cerca del 0,02\,\%), pero el 10\,\% de sus flujos de trabajo falló porque basta un archivo corrupto para detener un flujo, y la recuperación tomó varios días \cite{LinkedIn2020}. Lo relevante para este informe es que la replicación no protege frente a errores que afecten a muchos nodos a la vez, y que la recuperación acelerada también estresa el sistema. En mi experimento fallaba un solo nodo, el caso para el que HDFS está diseñado.
 
-\textbf{Límite del NameNode.} Un artículo sobre federación indica que HDFS escala los DataNodes pero no el NameNode, donde se gestionan los metadatos, lo que genera problemas de rendimiento y de crecimiento del espacio de nombres \cite{Dhulavvagol2023}.
+\textbf{Límite del NameNode.} Un artículo sobre federación indica que HDFS escala los DataNodes pero no el NameNode, donde se gestionan los metadatos, lo que genera problemas de rendimiento y de crecimiento del espacio de nombres \cite{Dhulavvagol2023}. En LinkedIn, el NameNode del mayor clúster necesita un montículo de memoria de 380 GB para mantener unos 1100 millones de objetos \cite{LinkedIn2021}, un ejemplo concreto de que el conocimiento centralizado consume memoria a medida que crece el sistema.
 
 % ------------------------------------------------------------------ 4. EXPERIMENTO
 \section{Experimentación propia}\label{sec:exp}

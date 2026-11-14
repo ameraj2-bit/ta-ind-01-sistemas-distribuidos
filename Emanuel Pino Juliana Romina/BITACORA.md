@@ -18,3 +18,17 @@ Registra cada sesión después de realizarla. Usa la fecha real y no completes s
 **Solución:** Inicié sesión y luego pude publicar el commit.
 
 **Tiempo dedicado:** Pendiente de completar.
+
+## Sesión 2 — 13 de noviembre de 2026
+
+**Actividades realizadas**
+
+- Ejecuté el experimento de Redis Cluster con seis nodos: tres primarios y tres réplicas.
+- Revisé el estado del clúster y la distribución de los 16 384 slots.
+- Guardé la clave `estudiante`, comprobé que correspondía al slot 13012 y la consulté desde otro nodo.
+- Probé dos fallos por separado: primero se detuvo `redis-3` y `redis-4` asumió el rol de primario; después `redis-3` volvió como réplica. En otra prueba se detuvo `redis-4` y `redis-3` asumió el rol de primario.
+- Guardé las capturas del experimento y documenté los resultados y conclusiones en el informe.
+
+**Dificultades o soluciones:** Pendiente de completar.
+
+**Tiempo dedicado:** Pendiente de completar.

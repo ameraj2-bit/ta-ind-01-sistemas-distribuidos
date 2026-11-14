@@ -8,6 +8,7 @@
 \usepackage{array}
 \usepackage{tabularx}
 \usepackage[backend=biber,style=ieee]{biblatex}
+\DefineBibliographyStrings{spanish}{artno={art\adddot}}
 \usepackage{hyperref}
 
 \addbibresource{referencias.bib}
@@ -48,6 +49,8 @@ La comunicación entre los nodos del clúster es independiente del protocolo de 
 
 \subsection{Replicación y recuperación ante fallos}
 
+La revisión de Sabaghian y colaboradores explica que replicar datos puede mejorar la disponibilidad y la tolerancia a fallos, pero también exige decidir cuántas copias mantener y dónde ubicarlas \cite{sabaghian2023replication}. En esta práctica, esas decisiones se reflejan en la distribución de los primarios y sus réplicas. Esto ayuda a entender por qué la recuperación depende de la topología elegida.
+
 Durante el funcionamiento normal, el primario propaga a sus réplicas un flujo de comandos que refleja los cambios del conjunto de datos. Si se interrumpe la conexión, la réplica intenta reconectarse y solicitar una sincronización parcial de los comandos que no recibió. Si esto no es posible, se realiza una sincronización completa mediante una copia de los datos del primario y el posterior envío de los cambios recientes \cite{redisReplication}.
 
 Redis Cluster intercambia mensajes de latido y usa información compartida entre nodos para detectar fallos. Un nodo puede marcar inicialmente a otro como posiblemente inaccesible; para considerar que un primario ha fallado y permitir una promoción, la condición debe ser confirmada por una mayoría de primarios dentro del intervalo establecido. Una réplica que cumple las condiciones puede solicitar votos y asumir el rol de primario. Si no es posible promover una réplica o no se conserva la mayoría requerida, el clúster puede dejar de atender solicitudes \cite{redisClusterSpec,redisClusterScaling}.
@@ -77,6 +80,8 @@ Esta restricción de disponibilidad no equivale a una garantía de consistencia 
 
 \subsection{Análisis de Redis Cluster según PACELC}
 
+Datta y Oggier revisan los problemas de concurrencia y consistencia al modificar datos protegidos con códigos de borrado \cite{datta2022consistency}. Aunque estudian una técnica de redundancia distinta de la replicación de Redis, su trabajo permite distinguir dos necesidades: mantener información redundante y coordinar sus actualizaciones. Al evaluar Redis Cluster, también es necesario revisar por separado la recuperación de datos y las garantías de lectura y escritura.
+
 PACELC complementa CAP al distinguir el caso de partición (P), donde se contraponen disponibilidad (A) y consistencia (C), del funcionamiento normal (E), donde existe un intercambio entre latencia (L) y consistencia (C) \cite{abadi2012consistency}.
 
 En la rama P, Redis Cluster favorece la continuidad de las operaciones en el lado mayoritario cuando se cumplen las condiciones de quórum, cobertura de ranuras y disponibilidad de réplicas para el failover. En el lado minoritario limita las escrituras después del tiempo configurado. No obstante, las escrituras aceptadas antes de ese límite pueden perderse si el primario aislado es reemplazado por una réplica que no las recibió \cite{redisClusterSpec,redisClusterScaling}.
@@ -86,6 +91,8 @@ En la rama E, el primario normalmente responde sin esperar confirmación de sus 
 \section{Modelos de comunicación}
 
 \section{Tolerancia a fallos}
+
+Kokociński, Kobus y Wojciechowski analizan sistemas replicados de alta disponibilidad considerando fallos de máquinas y particiones de red \cite{kokocinski2023correctness}. Su estudio muestra la importancia de incluir esos escenarios al evaluar las garantías de consistencia. Por eso, las pruebas siguientes permiten observar el failover en nuestro entorno, pero no bastan para demostrar que todas las escrituras se conservan ante cualquier fallo.
 
 Las pruebas se realizaron en una topología de seis nodos con tres primarios y
 tres réplicas. En la primera prueba se detuvo \texttt{redis-3}; según el estado

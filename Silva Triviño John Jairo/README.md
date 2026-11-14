@@ -6,7 +6,7 @@ Sistema analizado: HDFS (Apache Hadoop Distributed File System), comparado con C
  
 ## Video de sustentación
  
-Enlace: (pendiente)
+Enlace: https://youtu.be/15nJaGZGK3E
  
 ## Contenido de esta carpeta
  

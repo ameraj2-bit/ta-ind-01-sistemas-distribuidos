@@ -4,7 +4,8 @@ Informe académico individual de **Bryan Humberto Lombeida Escaleras** para la a
 
 ## Video de sustentación
 
-**Enlace pendiente de publicación.** Sustituir esta línea por el enlace al video de 3 a 5 minutos en YouTube (no listado) o Google Drive (con acceso abierto).
+- **Enlace del video en YouTube:** [https://youtu.be/BIcxJ_XgQCg](https://youtu.be/BIcxJ_XgQCg)
+- **Descripción:** Video de sustentación individual explicando la arquitectura de la prueba experimental con el emulador de Google Spanner en Docker, la consulta de datos iniciales vía gRPC, la detención del contenedor y detección de fallos por timeout, y el posterior reinicio y recuperación del servicio.
 
 ## Compilación del informe
 

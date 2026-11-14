@@ -11,11 +11,17 @@ servicios; Redis anuncia el puerto de cliente `6379` y el bus de clúster `16379
 
 ## Requisitos
 
-- Docker Desktop iniciado.
+- Docker Desktop iniciado con contenedores Linux.
 - Docker Compose v2 disponible desde PowerShell como `docker compose`.
-- La imagen `redis:7.4` descargada localmente.
+- La imagen `redis:7.4` disponible localmente o acceso a Internet para que Compose la descargue al iniciar.
 
-Ejecuta los comandos de las siguientes secciones desde esta carpeta.
+Ejecuta los comandos de las siguientes secciones desde esta carpeta. Antes
+de iniciar, puedes comprobar las herramientas y los seis servicios declarados:
+
+```powershell
+docker compose version
+docker compose config --services
+```
 
 ## 1. Iniciar los seis nodos
 
@@ -30,6 +36,11 @@ Espera a que los seis servicios estén en ejecución antes de crear el clúster.
 
 Este comando solicita confirmación en la terminal. Escribe `yes` cuando
 `redis-cli` muestre la distribución propuesta:
+
+Ejecuta la creación solo con nodos sin datos ni configuración previa. Si ya
+creaste este clúster y conservaste sus volúmenes, omite este paso: inicia los
+servicios y verifica su estado como se indica en la sección 3. No elimines los
+volúmenes para resolver un error de creación sin revisar antes su contenido.
 
 ```powershell
 docker compose exec redis-1 redis-cli --cluster create redis-1:6379 redis-2:6379 redis-3:6379 redis-4:6379 redis-5:6379 redis-6:6379 --cluster-replicas 1
@@ -48,12 +59,16 @@ docker compose exec redis-1 redis-cli -h redis-1 -p 6379 CLUSTER NODES
 Comprueba también la cobertura de slots y el estado del clúster:
 
 ```powershell
+docker compose exec redis-1 redis-cli CLUSTER INFO
 docker compose exec redis-1 redis-cli --cluster check redis-1:6379
 ```
 
 En la salida de `CLUSTER NODES`, verifica que haya tres nodos primarios (`master`)
 y tres réplicas (`slave` en esta versión), y que cada réplica indique su primario.
 La comprobación de slots debe indicar cobertura completa antes de continuar.
+En `CLUSTER INFO`, comprueba `cluster_state:ok` y los 16 384 slots asignados
+y disponibles. Los roles concretos pueden cambiar después de un failover;
+no deduzcas el rol de un nodo a partir del número de su nombre.
 
 ## 4. Insertar y consultar un dato
 
@@ -65,7 +80,7 @@ docker compose exec redis-1 redis-cli -c -h redis-1 -p 6379 SET demo:mensaje TAI
 docker compose exec redis-1 redis-cli -c -h redis-1 -p 6379 GET demo:mensaje
 ```
 
-Guarda las salidas reales de las verificaciones y pruebas en `evidencias/`;
+Guarda las salidas reales de las verificaciones y pruebas en `../evidencias/capturas/`;
 no se incluyen resultados anticipados en este archivo.
 
 ## 5. Cierre del experimento
@@ -78,5 +93,5 @@ docker compose down
 ```
 
 No agregues `-v` a este comando: esa opción elimina también los volúmenes
-persistentes. Para volver a iniciar el experimento, ejecuta `docker compose up
--d` y verifica el estado del clúster antes de continuar.
+persistentes. Para volver a iniciar el experimento, ejecuta
+`docker compose up -d` y verifica el estado del clúster antes de continuar.

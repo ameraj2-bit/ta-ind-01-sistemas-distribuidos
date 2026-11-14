@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[spanish]{babel}
+\usepackage{csquotes}
 \usepackage{graphicx}
 \usepackage{array}
 \usepackage{tabularx}
@@ -86,9 +87,114 @@ En la rama E, el primario normalmente responde sin esperar confirmación de sus 
 
 \section{Tolerancia a fallos}
 
+Las pruebas se realizaron en una topología de seis nodos con tres primarios y
+tres réplicas. En la primera prueba se detuvo \texttt{redis-3}; según el estado
+observado durante el experimento, \texttt{redis-4} asumió el rol de primario
+para las ranuras que atendía su grupo. Al iniciar nuevamente \texttt{redis-3},
+el listado de nodos lo mostró como réplica de \texttt{redis-4}. También se pudo
+consultar el dato de prueba después del failover. La Figura~\ref{fig:redis-recuperacion}
+documenta el regreso de \texttt{redis-3} como réplica.
+
+Esta prueba es distinta de la segunda: se detuvo \texttt{redis-4} y
+\texttt{redis-3} asumió el rol de primario. En la captura correspondiente,
+\texttt{CLUSTER INFO} informó \texttt{cluster\_state:ok} y los 16\,384 slots
+asignados y disponibles. La Figura~\ref{fig:redis-fallo-segundo} muestra ese
+estado. Estos resultados describen únicamente las ejecuciones realizadas en
+este entorno; no garantizan la misma respuesta ante cualquier combinación de
+fallos o particiones.
+
 \section{Experimentación}
 
+Las pruebas se ejecutaron con los seis servicios Redis 7.4 del archivo Compose
+del experimento. La configuración solicitó tres primarios y una réplica para
+cada primario, dentro de una red de Docker propia. Las capturas siguientes son
+evidencia de las salidas observadas en la terminal.
+
+\subsection{Estado y distribución del clúster}
+
+La consulta de \texttt{CLUSTER INFO} indicó que el clúster estaba activo,
+con seis nodos conocidos y tres primarios. También informó que los
+16\,384 slots estaban asignados y disponibles, sin slots fallidos
+(Figura~\ref{fig:redis-cluster-activo}). En la salida de \texttt{CLUSTER NODES}
+se observaron los rangos 0--5460 en \texttt{redis-1}, 5461--10922 en
+\texttt{redis-2} y 10923--16383 en \texttt{redis-4}. Los nodos restantes
+aparecieron como sus réplicas (Figura~\ref{fig:redis-distribucion-nodos}).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=0.58\textheight,keepaspectratio]{../evidencias/capturas/01-redis-cluster-activo.png}
+    \caption{Estado del clúster: seis nodos conocidos, tres primarios y los 16\,384 slots asignados y disponibles.}
+    \label{fig:redis-cluster-activo}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=0.58\textheight,keepaspectratio]{../evidencias/capturas/02-distribucion-nodos.png}
+    \caption{Salida de \texttt{CLUSTER NODES}: rangos de slots de los primarios y relación de sus réplicas.}
+    \label{fig:redis-distribucion-nodos}
+\end{figure}
+
+\subsection{Almacenamiento, consulta y asignación de una clave}
+
+Se almacenó el valor \texttt{Juliana} con la clave \texttt{estudiante} desde
+\texttt{redis-1}. Después, se consultó la misma clave desde \texttt{redis-2}
+con un cliente que sigue las redirecciones del clúster; la respuesta fue
+\texttt{Juliana}. La consulta \texttt{CLUSTER KEYSLOT estudiante} devolvió
+el slot 13012 (Figura~\ref{fig:redis-distribucion-clave}). Este resultado
+confirma la asignación de esa clave en esta ejecución y la posibilidad de
+consultarla iniciando la conexión desde otro nodo.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=0.58\textheight,keepaspectratio]{../evidencias/capturas/03-distribucion-clave.png}
+    \caption{Escritura y lectura de \texttt{estudiante} desde nodos distintos; Redis informó que su slot es 13012.}
+    \label{fig:redis-distribucion-clave}
+\end{figure}
+
+\subsection{Pruebas de failover y recuperación}
+
+En la primera prueba se detuvo \texttt{redis-3}. \texttt{redis-4} asumió el
+rol de primario y se pudo consultar el valor de prueba
+\texttt{prueba\_failover}, cuya respuesta fue \texttt{Redis sigue funcionando}.
+Luego se inició nuevamente \texttt{redis-3}; la salida de
+\texttt{CLUSTER NODES} lo mostró como réplica de \texttt{redis-4}
+(Figura~\ref{fig:redis-recuperacion}).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=0.58\textheight,keepaspectratio]{../evidencias/capturas/05-recuperacion-nodo-redis.png}
+    \caption{Tras iniciar de nuevo \texttt{redis-3}, el listado de nodos lo muestra como réplica de \texttt{redis-4}; también se observa la consulta del dato de prueba.}
+    \label{fig:redis-recuperacion}
+\end{figure}
+
+En una segunda prueba independiente se detuvo \texttt{redis-4}. La salida de
+\texttt{CLUSTER NODES} mostró a \texttt{redis-4} como fallido y a
+\texttt{redis-3} como primario. En ese momento, \texttt{CLUSTER INFO} mantuvo
+\texttt{cluster\_state:ok}, informó los 16\,384 slots asignados y disponibles,
+y registró seis nodos conocidos (Figura~\ref{fig:redis-fallo-segundo}).
+Este segundo escenario no corresponde a la caída inicial de \texttt{redis-3}:
+se trata de una prueba separada en la que falló \texttt{redis-4}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=0.58\textheight,keepaspectratio]{../evidencias/capturas/04-tolerancia-fallos-redis.png}
+    \caption{Segunda prueba de failover: \texttt{redis-4} aparece fallido, \texttt{redis-3} como primario y el clúster conserva la cobertura de slots.}
+    \label{fig:redis-fallo-segundo}
+\end{figure}
+
 \section{Ejemplos del entorno}
+
+Los siguientes comandos de \texttt{redis-cli} se ejecutaron desde los
+contenedores correspondientes mediante \texttt{docker compose exec}:
+
+\begin{verbatim}
+redis-cli -c SET estudiante "Juliana"
+redis-cli -c GET estudiante
+redis-cli CLUSTER KEYSLOT estudiante
+\end{verbatim}
+
+La opción \texttt{-c} permitió que el cliente siguiera las redirecciones de
+Redis Cluster al consultar desde un nodo distinto al que recibió la escritura.
 
 \section{Análisis comparativo: Redis Cluster y Valkey}
 
@@ -97,7 +203,7 @@ Valkey es un almacén de datos en memoria de código abierto y un fork del códi
 \begin{table}[htbp]
     \centering
     \small
-    \renewcommand{\arraystretch}{1.2}
+    \renewcommand{\arraystretch}{1.0}
     \caption{Comparación de las características documentadas de Redis Cluster y Valkey Cluster.}
     \label{tab:redis-valkey}
     \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
@@ -129,10 +235,36 @@ Desde una perspectiva de ingeniería, este diseño puede ser adecuado cuando la 
 
 \section{Conclusiones}
 
+En la prueba, Redis Cluster distribuyó las ranuras entre tres primarios y
+mantuvo una réplica por cada uno. La clave \texttt{estudiante} se asignó al
+slot 13012 y pudo leerse desde otro nodo. Esto ayudó a relacionar el
+particionamiento del espacio de claves con las redirecciones que maneja un
+cliente compatible con el clúster.
+
+En las pruebas de fallo, Redis Cluster promovió una réplica en cada uno de los
+dos escenarios realizados. Cuando se detuvo \texttt{redis-3}, \texttt{redis-4}
+pasó a ser primario y, al regresar, \texttt{redis-3} se incorporó como su
+réplica. En una segunda prueba, al detener \texttt{redis-4}, \texttt{redis-3}
+asumió el rol de primario y las salidas capturadas mostraron el clúster activo
+y con todos los slots disponibles. Estas observaciones corresponden a esta
+topología y a estas ejecuciones; no demuestran tolerancia ilimitada a fallos.
+
+La práctica también hizo visible el papel de la replicación asíncrona: la
+promoción de una réplica permite continuar ante ciertos fallos, pero no
+significa que cada escritura confirmada ya estuviera replicada. Por eso, la
+disponibilidad observada debe analizarse junto con el quórum, la cobertura de
+slots y la posible pérdida de escrituras durante un fallo. La comparación
+teórica con Valkey se conserva en este informe, pero no se realizaron pruebas
+equivalentes con Valkey y, por tanto, no se presentan conclusiones
+experimentales de rendimiento entre ambos sistemas.
+
 \section{Declaración de uso de IA}
 
 \section{Anexos}
 
+\begingroup
+\setlength{\emergencystretch}{3em}
 \printbibliography
+\endgroup
 
 \end{document}
